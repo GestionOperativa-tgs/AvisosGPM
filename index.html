@@ -268,6 +268,8 @@ const STATUS={MEAB:"Mensaje abierto (sin tratar)",METR:"Mensaje en tratamiento",
 const ESTS=[{n:"Abierto",c:"var(--e-pen)"},{n:"Cerrado",c:"var(--e-ok)"},{n:"Anulado",c:"var(--e-nc)"}];
 const FASES=[{n:"Sin tratar (MEAB)",c:"var(--p1)"},{n:"En tratamiento (METR)",c:"var(--p3)"},{n:"Cerrado en SAP sin fecha real",c:"var(--p6)"},{n:"Otro",c:"var(--pn)"}];
 /* Sectores por ubicación técnica */
+/* Avisos que no se tienen en cuenta en el tablero (por descripción) */
+const EXCLUIR=[/^relev\.?\s*t[eé]cnico\s+trampas/i];
 const PLANTAS={OCTY:"PC Tratayén",CCSA:"PC Salliqueló"};
 const SIS_PLANTA={"00":"Servicios auxiliares","01":"Cañerías y válvulas de planta","02":"Gas combustible y regulación","03":"Motogeneradores (MG)","04":"Aire de instrumentos y servicios","05":"Separación y filtrado de gas","52":"Aeroenfriadores","06":"Turbocompresores (TC)","07":"Venteos, drenajes y efluentes","08":"Control, comunicaciones y F&G","09":"Paro de emergencia (ESD)","20":"Medición de gas combustible",INS:"Instrumentación",IZA:"Izaje",TAN:"Venteos, drenajes y efluentes"};
 const SIS_DUCTO={TRAMPA:"Trampas scraper",ME:"Plantas de medición (PM)",PM:"Plantas de medición (PM)",CA:"Cañería y traza",PA:"Protección anticorrosiva",VALVUL:"Válvulas de bloqueo (XNV)"};
@@ -320,7 +322,9 @@ function ubicar(u){
 }
 function normalizar(raw){
   const S=v=>String(v??"").trim();
-  const rows=toObjs(raw.AVISOS).map(o=>{
+  const todos=toObjs(raw.AVISOS), base=todos.filter(o=>!EXCLUIR.some(rx=>rx.test(S(o["descripcion"]))));
+  const excl=todos.length-base.length;
+  const rows=base.map(o=>{
     const u=S(o["ubicacion tecnica"]), loc=ubicar(u);
     const den=S(o["denominacion objeto tecnico"]), eqn=S(o["equipo"]);
     const st=S(o["estatus en sistema"]).toUpperCase(), tk=st.split(/\s+/).filter(Boolean);
@@ -345,7 +349,7 @@ function normalizar(raw){
     if(r.anu) r.dq.push("ptbo");
     r.rk=prioDe(r.pr).r; r.anio=r.fa?String(r.fa.getFullYear()):"";
     return r;}).filter(r=>r.av||r.desc!=="(sin descripción)");
-  return {rows};
+  return {rows,excl};
 }
 const DQ=[
   {k:"mece",t:"Cerrados en SAP sin fecha real",d:"MECE sin Fin avería real: el tablero los cuenta abiertos. Completar la fecha real de cierre."},
@@ -611,7 +615,7 @@ function controles(){
 }
 (async()=>{
   const {raw,src}=await cargar(); D=normalizar(raw);
-  document.getElementById("fuenteDatos").textContent="Fuente: "+src+(raw.generado?" · actualizado "+new Date(raw.generado).toLocaleString("es-AR"):"");
+  document.getElementById("fuenteDatos").textContent="Fuente: "+src+(raw.generado?" · actualizado "+new Date(raw.generado).toLocaleString("es-AR"):"")+(D.excl?` · Se excluyen ${D.excl} avisos de relevamiento técnico de trampas`:"");
   if(!D.rows.length){document.querySelector("main").innerHTML=`<p class="empty">No se encontraron datos.</p>`;return;}
   controles(); render();
   let w=innerWidth; addEventListener("resize",()=>{ if(Math.abs(innerWidth-w)>40){w=innerWidth; graficos(vis());} });
