@@ -16,7 +16,7 @@ Filtros: año, sector, sistema, equipo/objeto, clase y responsable. Chips por pr
 - **Abierto**: sin "Fin avería real". Inicio y fin deseado son de programación y no cierran el aviso.
 - **Cerrado**: con "Fin avería real".
 - **Anulado**: estatus PTBO (petición de borrado). Se excluye de abiertos e indicadores.
-- **Excluidos**: los avisos "Relev. técnico trampas" no se tienen en cuenta (lista `EXCLUIR` en `index.html`).
+- **Excluidos**: los avisos "Relev. técnico trampas" y "Adquisición gas patrón" no se tienen en cuenta (lista `EXCLUIR` en `index.html`).
 - **Programación vencida**: abierto con fin deseado anterior a hoy.
 - **Sector y sistema** salen de la ubicación técnica: `OCTY` = PC Tratayén, `CCSA` = PC Salliqueló, `TERC-NKTS-AB/BC/CD/DE` = tramos del gasoducto. El sistema de planta sale de los dos primeros dígitos del segundo bloque (03 = MG, 06 = TC, 05 = separación, etc.). Los catálogos están al principio del `<script>` de `index.html` (`SIS_PLANTA`, `SIS_DUCTO`, `CLASES`, `PRIOS`, `STATUS`) y se editan ahí.
 
