@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Avisos SAP-PM · O&amp;M GPM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: encabezado con filtros → resumen → abiertos por sector → matrices → gráficos → calidad de datos → planilla */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#14202c; --ink-2:#4a5866; --ink-3:#7a8794; --line:#dde3e9; --grid:#e9edf1;
+  --brand:#123a5c; --brand-ink:#ffffff;
+  --p0:#7d1a12; --p1:#c0392b; --p2:#e8590c; --p3:#d49a00; --p4:#2a78d6; --p6:#6250d6; --p7:#9a5bb8; --p8:#0f8a8a; --pn:#a9b4bf;
+  --e-ok:#1baf7a; --e-pen:#e8a33d; --e-nc:#a9b4bf;
+  --ok:#14613a; --ok-bg:#c9ecd7; --bad:#9e2a24; --bad-bg:#f6c9c5; --warn:#7a4b00; --warn-bg:#fbe3b8; --na-bg:#eef1f4;
+  --g1:#AEC6CF; --g2:#FFDAB9; --g3:#FFD1DC; --g4:#d6e9c6; --g5:#e3dcf5; --k-ink:#2C3E50;
+  --f-disp:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",Arial,Helvetica,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --panel:#17202a; --ink:#e8edf2; --ink-2:#b3bfcb; --ink-3:#8593a1; --line:#2a3642; --grid:#222d38;
+  --brand:#0b2740; --brand-ink:#e8edf2;
+  --p0:#d0493c; --p1:#e5675a; --p2:#f08a4b; --p3:#e2b43a; --p4:#3987e5; --p6:#9085e9; --p7:#b784d1; --p8:#2bb3b3; --pn:#5d6b78;
+  --e-ok:#199e70; --e-pen:#d99a3a; --e-nc:#5d6b78;
+  --ok:#5cc58e; --ok-bg:#163327; --bad:#f08a83; --bad-bg:#3a1d1b; --warn:#f2c46d; --warn-bg:#3a2c12; --na-bg:#1f2933; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+header.top{background:var(--brand);color:var(--brand-ink)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:16px;min-width:0}
+.logo{background:#ffffff;border-radius:8px;padding:8px 12px;display:flex;align-items:center;flex:none}
+.logo img{height:40px;width:auto;display:block}
+@media (max-width:420px){.logo img{height:30px}.logo{padding:6px 9px}}
+header.top .wrap{padding-block:18px 16px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font:600 12px/1 var(--f-disp);letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+h1{font:700 clamp(24px,4vw,32px)/1.1 var(--f-disp);margin:6px 0 0;text-wrap:balance}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls label{font:500 12px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;opacity:.8;display:flex;flex-direction:column;gap:4px}
+select,input[type=search]{font:500 14px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:inherit;max-width:240px}
+select option{color:#14202c;background:#fff}
+input[type=search]{border-color:var(--line);background:var(--panel);color:var(--ink);min-width:220px}
+main.wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:28px}
+section>h2,.sec-head h2{font:700 20px/1.2 var(--f-disp);margin:0;letter-spacing:.01em}
+.sec-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.sec-head p{margin:2px 0 0;color:var(--ink-2);font-size:13px;max-width:900px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.panel h3{font:600 16px var(--f-disp);margin:0;letter-spacing:.02em}
+.panel .u{font:500 12px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-left:6px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:980px){.grid3{grid-template-columns:1fr}}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.grid5{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:500 13px var(--f-body);display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.chip[aria-pressed="false"]{color:var(--ink-3);background:transparent}
+.chip[aria-pressed="false"] i{background:transparent!important;outline:1.5px solid var(--ink-3);outline-offset:-1.5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
+.seg button{font:500 13px var(--f-body);padding:5px 12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.seg button:focus-visible,select:focus-visible,.btn:focus-visible,.chip:focus-visible,input:focus-visible{outline:2px solid var(--p4);outline-offset:2px}
+.card{display:flex;flex-direction:column;gap:8px;border-color:transparent;color:var(--k-ink)}
+.card .lbl{color:var(--k-ink);opacity:.78}
+.card h3{font-size:16px}
+.bign{font:500 clamp(22px,2.6vw,27px)/1.1 var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.bign small{font:500 13px var(--f-disp);letter-spacing:.04em;margin-left:4px;opacity:.75}
+.csub{display:flex;flex-direction:column;gap:2px;font-size:13px;padding-top:8px;border-top:1px solid rgba(44,62,80,.2)}
+.csub div{display:flex;justify-content:space-between;gap:8px}
+.csub b{font:500 13px var(--f-num)}
+.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
+.stat{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-disp);letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;align-self:flex-start;white-space:nowrap}
+.stat.ok{background:var(--ok-bg);color:var(--ok)}.stat.bad{background:var(--bad-bg);color:var(--bad)}.stat.warn{background:var(--warn-bg);color:var(--warn)}.stat.na{background:var(--na-bg);color:var(--ink-2)}
+.card .stat.ok{background:#c9ecd7;color:#14613a}.card .stat.bad{background:#f6c9c5;color:#9e2a24}.card .stat.warn{background:#fbe3b8;color:#7a4b00}
+.stat svg{width:12px;height:12px}
+.lbl{font:500 11px/1.3 var(--f-disp);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.ph .cnt{font:500 12px var(--f-num);color:var(--ink-3)}
+.vdesc{font-size:13px;color:var(--ink-2);margin:0 0 10px}
+.it{display:flex;flex-direction:column;gap:5px;padding:10px 0;border-top:1px solid var(--line)}
+.it .r1{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.it .id{font:500 12px var(--f-num);color:var(--ink-3)}
+.it .inst{font:600 13px var(--f-disp);letter-spacing:.03em}
+.it .cond{font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.it .r3{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:12px;color:var(--ink-2)}
+.it .r3 b{font:500 12px var(--f-num);color:var(--ink)}
+.tb{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;color:#fff;white-space:nowrap}
+.tb.o{background:transparent!important;color:var(--ink-2);border:1px solid var(--line)}
+.code{font:500 11px var(--f-num);color:var(--ink-2);background:var(--na-bg);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.hint{font:600 11px var(--f-disp);letter-spacing:.05em;text-transform:uppercase;color:var(--bad);display:inline-flex;gap:5px;align-items:center}
+.hint.p{color:var(--warn)}
+.more{font-size:12px;color:var(--ink-3);padding-top:8px;border-top:1px solid var(--line)}
+.more button{font:inherit;color:var(--p4);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.empty{color:var(--ink-3);font-size:14px;padding:12px 0}
+.mx td.c{text-align:center;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.mx td.c span{display:inline-block;min-width:60px;padding:6px 8px;border-radius:6px}
+.mx td.c small{color:var(--ink-3);font-size:12px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--f-num);font-size:11px;fill:var(--ink-3)}
+.chart text.lb{font-family:var(--f-body);font-size:12px;fill:var(--ink-2)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--panel);font:12px/1.4 var(--f-body);padding:8px 10px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-100%);z-index:2}
+.tip b{font-family:var(--f-num);font-weight:500}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);flex-wrap:wrap;margin:8px 0 6px}
+.legend i{display:inline-block;height:9px;width:9px;border-radius:2px;vertical-align:-1px;margin-right:5px}
+.legend i.ln{height:3px;width:14px;vertical-align:middle}
+.note{font-size:12px;color:var(--ink-3);margin:8px 0 0}
+.dq{display:flex;flex-direction:column;gap:6px}
+.dq .n{font:500 24px/1 var(--f-num)}
+.dq p{margin:0;font-size:13px;color:var(--ink-2)}
+.dq button{align-self:flex-start}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px/1.25 var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);vertical-align:bottom;white-space:nowrap}
+td.n{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td.nw{white-space:nowrap}
+td.w{min-width:260px;max-width:400px}
+td .sub{font:400 11px var(--f-num);color:var(--ink-3);margin-top:3px}
+.btn{font:500 13px var(--f-body);padding:5px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink-2);cursor:pointer}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+footer.wrap{padding-block:0 32px;font-size:12px;color:var(--ink-3)}
+footer h4{font:600 13px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:16px 0 4px}
+footer dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px;margin:4px 0}
+footer dt{font-weight:600;color:var(--ink-2);font-family:var(--f-num)}footer dd{margin:0}
+.fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 32px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff}.controls,.seg,.btn,.bar,.tools,.more button{display:none!important}
+  .panel{break-inside:avoid}
+  header.top,.card,.tb{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .it .cond{-webkit-line-clamp:unset;display:block}
+}
+</style></head><body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATwAAAB4CAYAAABvu07IAABJO0lEQVR42u2deZxcVZn+v+8591ZVd6fDmrAHEAVJBBcQUBkTJJ1EYdyr1XEZHUdxHUYIi6JTXTojkE1xHRz3fbr8uSEKSVgyrihREBIg7FvIRrbequrec97fH/dWL0knZKleQur9WB86sdJV99xznvuuzyPsjhUKhpGwIkDR07CGNaxhDWtYwxrWsL032bW3qYAos+a/BwlfhsYRSh28PVUkEHDfY/HcP0DBNDy9hjWsYSNlwa6BoihzPprFcQWZphNwVRDZ+09XD2EzlDcGwB/ITxNKjZvSsIY1bOwAL7G+g4UMvUS9Dh97qIeHhwMsolHjVjSsYQ0bP4CXmEHEgghSB8BTBRGL1sNdbFjDGtawZwKwhjWsYQ1rAF7DGtawhjUAr2ENa1jDGoDXsIY1rGENwGtYwxrWsAbgNaxhDWsY47YtpWENa9iz0AoFzLRpeSEPlCCfL2lHB3R0oIPf1wEyrZQf0kY2+L0iQ9/fALyGNaxh48WksxOzYgVaLOIZZsypWNzur5QdjEMVi9DZmbfkIU9JYfwBYAPwGtaw/dSj+/Sn8e3tOIDf3fPiI6u4U0Cfr94cIzBJhQNEtUnTmXtRiTHarcoWRTYY9Ckv8niIf7SXzFNzTl6+VqTktpktMCXysoKSdowDAGwAXsMatp9ZZye2BnS33nvKq1XMP1e9f6U15ohsTpI5eVV0B9AkQv974kipVk01o9GGm1e+8LGbV+jdqN6ByO1SlftE7txc8wiLQKfm7QpKWgRlDMCvAXgNa9h+CHaLV7zoeYFhnhhen8saqhVPFKm6bu+H8ijJ9hGtDkE/ESEThObIIJAjjeEsVejrdY6sPrT07hf+1VhujuP4t7NOWXFP+yAPsFPzNk/Jj6bX1wC8EaXeUih0CCtXCuSHeUsJpk5Vih21qEEby7aL6wpAx6DT2KHbHNDGWm4Hdnnb3l5yS+4+9ezA+B83tQRH9XQ5dVHsU+AyIPaZyZOG/o33qEaqcaSD0FBsmJHnNYXyPK+8pa836F5696nLrZXrvefX5067c0UN/Do7sSvyaFHwo8yHp8MM8XcIdChnLcrR6v+CDafhYl8n8gBHmLPEff/N4ks/xPRbLMtmuD28lDHe4Crk2w3koZT3e/Z9VMiXDJSgVPJ7cGhlZM75WK1tbT2AqSuU4u5wJRYM+Wky8G87dOz3yBjuTsWI4JesOPXFgZUlmYw5pNzrnJhnArg9/0gURVRVRazFZLIGY6Cn2/WC/NYY/+O+Pnv9a15yx/oaO2biM44c8O06S8n0QkC29W+Y4AV1BzzX9xVuvPTD+6S3ke80wx7G064NObTnUHx8GGoOwdAKZMFbjI1wvoz4bmJ5mjBYz4Z7N7D8a9GwlPrF/YgUtVAwrJwmlNqHf/DlOzNseXwCMU1YnwHABIqrVsm29uGiXm64sLJTAE3ul+4vXqAq0tGBtL31pJYq2Vuamuxpvb0uFiQYxe+gIupr4JfNGbxCtewf9Z6fqHXfnfn8u/8+0sA3FPDO/ewhxBkhyA5shLgiBFVFszmsX4oNn19XwAtyFlf+NiZzIa6aw+d2z8OLK4KrCOdWnx49YCgY8iuF0qCK1MyrDoDwRYieCfoSRJ4HHI1yIEYyYIaSpqomBKjqK4hsRvVJVFZh/HK8+RO51r/yqwt6+w9qoUOe8fryC5voKk8gmlifdYgrAl0xy4qbR+XBsa1n/KqFR2HdNEROAZ6PcizIZOBA0BZkUEpGiUB6EbYAG0BXozyIkfvA3YfTB1l6+ZbtwXWl7KE3vc/l7W6659S5Lc12fk/P6ILdzsAvzIjJZoSebtcrIj9Xw1de9fw7f1+rJNMB9Qx1hULBUCx62hZ+CGuuwMcxOpznJ4JwGBDWH3O1B9iAqt39jSceY3Jo/E0WX/qJ2i8c0bC1BnTTvzSBTPUccK8HZiDyHIJs8hW8SwANT1ruSvMboillfnLxIsnAi6mlTxTiqkf1XsRfj+iPufGyv/Yf0O1Cs5R+/9wvHoIp/xyR54JWh7+Hu31vBGMiVN/L4otv6d8r9bR83g55cLTNfwHKbKzMRHkJYiZjwzRar61l/5oOk1tKHyySPo99DD6uAo+j3An8HpHfYYI7h3iC+U67+2HzvuHdiaBLHjztAClHt2ez9oRqxavI+JiyUkUF9caKzTUZ+nq8U/iZ4BeeM/WuP9UAO5+nLsWNYFCa5gyCpiOJepLDN5z5kXgQKoi0ILZlj363eghzUO09c1sUrb8HIo4SjtlXHocP34mU34axJ2NyCcD5GKKyG3hADAK2gRMpQxLrqkAMsShUNf2nFhtOxdipxH3/xuyFP8fJAooX3Q5FhgBPoUMoomR7JhPbs7BBkACt1GU3EuSg2jsVuIWV06SuXjIdSkkcp70/5JATzwN5D+pnEuaa+8FK3eA1TR8SKjvaSqjokFKiiIBkMPYEjD0BeCNxJcZFK2lbtATjfoVk/kipvfJsTCOUSnkDJWf6qtPDrH1uCnbjhnA3+S5inUN7u50XI7a52by5p0dff9OKU3+A0SvPPfmu+wbnIetUpfUVfKSod6i3O+nAGQmYVzTW4YsmPDNNvI8t0Ddi4StFT6ndMXvREXj3b3jeS5iblHgPkSYhftKdlDBC73KKVAZ5J0OB0EWKqypistjsW9Dy65i14KuYypUUr1g/4O11pKsgHujFx62oal0QT/G4WBBfra9X12mTHF0RZl/9WjS4BGPPxlhwVYhTgEuqhgxd02dYVxm0poOR28fJmgKICbDBqRh7KnH5Inz1DtoWlhBKFC9+YLfSCOMf8tKrkRnZrCGuxv6ZK7FjB3zeJ8BnRIKmVvvPvd3x65befernqpnez4s8sHVvvT0zKDJKOg6VtPNwuNeIVovNjj93J6/+7zsCLnq+00LRk89b2hZegPo/ETZdjgkmEfU5XOyTWyU2/Xyp23pIjU5flajPIeQIch/DZ3/LzKtfmxxEUW4dct21RKHs0VoO9xIMGKlvCNvuOGf+scxe9AMIf4ENz8ZHSlR2qFdEbL+UQH3WVPrlCWpr6iJP1OcAwWZeTJj5LPBnZi38Fm3zXgGShrcqI6bHPArWnk88IlFOdU5H+BjXCfhErFe0pyt21poDJ7QGxWbfcstNK184q70dJ4LqHqomNthSdlYtLLU7Zi18LlvO+hlB+N+InULU59A4PZSjsn4JoKoqcTnGBCdhw5/SNn8+c67JsqwY7yMHMgGOUskxe97rCM3vsJl/Qr0SVwY9OEblRA56oJCCX9khchBB5t2IvYVZC37KzKun9wNfvtPuYQQypvk7BL3xjlNbMHKU90p9crujA3wiYuNYtbc7dmHGvCSwXH/zyhfO/+XtpzWL4Au37H4fcQPwdlbIedXVrwf9P2zmH4mrDu/8KB7K4dIJAS72qDeETXNRdx1t84+nWPSIseN8TZPwsG3eRUjwE4w9OvWwQMSM6XergZ+6xMtEQ4LsG7DBUmYt/CGzFr4wCcFF90VvbwK0iGqr93WMQYZJSu3OC2WX2oJqHl+5z3vnCJpb7NzWCfHSJStOfXHxHOLOTuzugHhj0mK4xt2ieGbOvxgbXIUQEJfd9nmkMfuGBki8PZttQ3UpbfPeROzXYayMU285BburOwiyBVwMGvlxs6ZDj1fi9UVlj0hAkHsbceU8Zs3/Et7No3j5lpHtBKi/VYPYKIHZCzAjDSNJ/5MugNT65aRW50wSIcOlUdMFS2d0dWAWJim513oYBFQHUhm1AosIRhXt6XGuqcm8zER+8Y13nfrR2af8/ceqGNLv2PDwdtcLQZS2+VcSZheg3uLcODyYJN5eXHbY8DmI+RVW3gCUGW8RS77TUix6Zs2bS9BUSPKeXsfYq9u1NAKQ5k8nEjR9Ahv+jrb5ZwJKYd85O9U48ICXXWgRQfGouuSFB8RakTAU09RsTPMEaydMDGxLa2CbW4zJZkWMFbxHvWrkHH1x7Lti5ze7SJ+OI93gIn06dn6zi7XLOe1T1Ug9aq2QyYppara2pTWwEyYGtqnF2lzOmDAUMQZJoTD5PkkN3vb1OgdyaC5rfnjTihd+UgQvBtVd8PQaHl5/20neUCw62uZdRZi7jLjqwcu4PpgilrjqMfYolC8APmlzGSeZ6Vo1ds68N6DhVSnYybjPnG+7xuqVqC8iO/EFVLeeB9zGyk6B9n3lKnoQ6ZLUTRu0+r4GE6pirEWC0EgQJO2hcaxUKx7nfbdzsp6qXyOwRlXWipE1wHrv/EaM2QK+20jYq+rKDlPNGh974yOvRqNqbJpCG1ScBBYyiM1ZjZrj2LZWvTswQA5RZbJHjjTo4SBHKByB6qGZjAnCjLEiQhwpUeRxTkwc+UhETHOL+czNK144+Zypr/93kaKv9R02AG/nlcMkmT5zweUEmcuIqw7U7BMHUzBJS4+YxGPX8VP0KbY75sw7AW++isHivR+Id/YhU1GMDal0PYUJvgkk87njP/GvALNf9Peem1eeukYMJyHq0sZ1G4ZiwkzyPI+qSjXSbld2j1VFHlD0XlVWifKwzZnHJ4hdd913l3clRKEja7ffflrYles7RK09qhK746tV83yBaYg+X5HnZrIyIZOxoYuVcp+nqcV89NZ7fpZRzX8YSjsFvQbg1Tr9z736LVj7WVyUgh370MGUWk5pnH3ngiFmAZnsYWkV1O6bm0TBBIK4L3DDxx4hn7cUi25fIg1Q5MFsTmaACa0V+no9UeQfrVa5G2S5Cndksrpi86bwideevrx3Z5XfUilvJk1aJ6taTxKA0ziN5cO898TTTuwHnVXLV223N08Dlqf/8sSu+3TGjBlepKinn748Atakr/5fvWrVc7OP9jYfW1X/wqiqZyj6MlROiWMmTjoie8HN965y557MhwuFNM/dALxhDmSp6Ji9aBrKlwYxxgj7ZMFlHD1EikXHzPlvJAhfT1Tx4zxntzPz2NAQl1fRHPw3qFDC7ytbpFTKC5QQ+Ful7DdUqvoH7/UPouaPXvpWtE279+nhQO3WW6fbBNBOA2B114k6bcYMBTTfLj6p7i2rMzjfKp2d08yKSZNkBrCqdZXAck7suk9vvXWZP/HEByrAqvRVUsUsWfmiE6Kqvnz9U9VZovqWpfecesPMk/9+3Y6mMoL9u0gB3HZNFlf9KkHu0HFVjd2X17VU8kz/Vg7Z8HEGcE7YN527lKtQruQXH9tM/ii7QyaXcWjt7cmccm/sf9i7Kf7V+afd8+iOwO3E096mt94KJWZo+zkS7wzQLr7jqZaDzYQJErnWrPiW2AcTbeCbQ29y5cBPEBeEgfHBQOFEnRitZox0OdVKjOkxTra6MOj2cdS1ZkLrVhGpQMLEXNyOAKHTFm6ZFMyYAauW/0jef9omn9DJ33E/cD/wnd/ePXVKX5xtGRzONwBv21aJWfP/nSD3D7hqjEgjxN/7QkXSsJ3deB4mPB1X9ci+CnbqCTKWuPpHbOZHaV5ynxw1O//UuzYBm2oAx4wZcOsMOm6F4jnnpOD2tcHXLoU7uye1GA43kTnOBP54vE4xwtFi5HADh4IeQGBawOQylqwNsmKMoclaEDMkXaspO5B3Du89Lo5UQsqqcZ9a6Wnt69r0+Tu2rhPkCVUe80Ye8moejAMeW07TmvYXSHUwEK4uFEzhlluCGdwK3EoaDj+2zWR1A/AGEupFzzlXnwTmMnzswdt91QkZXzFUPmlvVf8uJAMa1bkFRXU7goAhpAJSP29SRPDeA5/hhgsrtOZt0je2L275grl1Bqbj1hmDAK7YX5X5z7/1HpmV6klGzKkB5gXc1f18EZ0iyqSwOcwFmbCfk1vV471H05fX9Oc4Uieirqogsi0XPKhKbbjNigjGNBkxTWLMwcbaY0QMYiQlG1IqvT2oZ/0/0P342XdsXemRv1W9Lo9h5RUvmbieYtHXrqBwS0dQuAXDDHxRdjz/vH8CXm2VQvNJguxBSa/VqOaYks2gotvzHA05vLLvPUjEc96i51B1r8RH1HH8TlH1GGMxVpBBRXTVQfyCjrRnq0Y+IHvF1RhXfsnLu29kSZrv3bc8VKFUMpCn2C6OIn4ZRUBl/h3l41Tj0zPIWSLdLxXRE63NHpZtakqair3HxXHyiso+rpZ16PZUSTBs0BNG0t7e/iWX4RgCEn9PVdU5PC4JP6ugtTBU025mwQZBMMkG4SRj7UuAd5R7e/BeH/v837beqVZuLUdu2V+zB9xVTD3AVCzD0s6wrOPB/lmVLTpmLjwLaCcuj14TrKZd5SIWE4BY2W4+PiEFrR3epBF0bw7uaFqNPqriXkGQOTBhe5H68FSJEWzWEpcroA+CPg5ma3o6W4HDEDkKmESYs2g/vVSt12w31lAVsYKPelHznxSLPgHzfeXBo4ZpCCKulhM74pdPNj/VG7z4vcdk2k6b2D0jdpyabc4dFARBMqZdreLiqpZ7uvzAxJ1K0uIhZruVS/9iz+6uyDbSGEP/LANxcBxFuCjSGhgKYjOZzJQgzExR+Megtyt6Rdx154y7e264cXP0i1+efcByaRenNcCXoaAXbPdUA7cTfbYRatdQTbu62SN6KNh1uu6E3RaMu5CgKTMq7RKKQzAEGYMYiPsUF6+G+FFE1gLdSajksyAHgRyF6hRsOBETWFwE3vlBo2XjNJxNe9OMnpVQPeEBu9erZ6zgfBUqX8TYH7Jhy70sL/ZuR6l/ePdkKvFzicung3kl6FmYcDLGkK6hG2CA2WnfnSfMWOLe77P00ttHhPh0RLw5DO3iKEryXa/VZg5a+wrg/LVVeRXip92rzTK9OUN3uY+40uejSr9XZRIdH+zQgRPGstuqf0ht8NeIo4qPokriYmLCQ1ubTn+oak7/v/XrLqNzzR9U1n+d/KTvp2G1DPb0hgJe2GRBLTtyeFyFHYLh3pgJBBPu2cFQbwlyEFeCXc7dtc1/AchrUw/EjGgXFECQtfgYXHQbXq/D2v+jt+9efnfFeobXD8mRnXg0LnoRvjoH5NUEuSPRmJR7z4zPtpgUFFROTklIZe/Xz4DSi9F3cuMlPx1esEhg+QUR8GT6WgYsZM5VR+NkBk7fjOi5hE0TkvsQ7+ThoYqxhrj8NM5dPe6ryzWgG+TN8ePVL8WaN8K68xHzAnIteBchWua2pza5szNNnNBkTEXFGNkXa+jJ/vdAi1Fd8XS3/vfqsm6ONJSmlumKTKdzzT+Ssf/K6+iGAU8voKNDKRaB4CtUNm8dUKkaRIXjVYEQMW9HzKGor1eTaxI6uPhOfPRrkOy2LugzmlfFVUKUXz5ThSaRSwSEdxLkmtPcnR2x8NUEST4jjm5C40VEvYtZVoy3V4qryQ2m9O3LimXggfT1E2YvOoK48jaMfIQwdzxxRQdGrceZvfbqVvrkGNTVZw3DjCWqfJcll/yU6bcETP6KDmhQyPbED/3Kce2eGy5/Avg+8H1mfu5k4nI7yNsIwpNAwFV92q5thrShBKEhKn+Jmz7+UDILPA7bUAoFQ0cHiHjA8bOHD8Q1/yPIO/DuHJpbQ+IIqmXo2+rSONLEXu2NGyM+dHRut4/aeDGvEBjIiPDnrlh+8FRFumJNCA7KPR4VZeLB7Wx9+j5E/oPOTlt7GOzegWlbcCc2OLX+qmW9X+TGy/5tFBpzlTnXTMRXb8eEz6vbdQzfzmDw8VpUP8Hiud/cXjthp7KBAgUhP02SMDH1nGYvOgL1/4GxH0jzfCPL6Kgk1+GqF7B47tcGmIp3oPeBKOd/fgrV+K+IPSQdeZO9avo1ocHHb+dlW3+8UzWznamUDRYHmnPNRDR6I8qHMOFLEcBFvn9OxQSCjx7G5c7gpo9sTB5G4yicrRUi2tN16HxyCiZ8J6rvIpM7EWOg0gvqXUoEa7Y9BKLKBVOaOH1CQK/XfYYFocZu1WSFrbHy6w0RSzZW0yLHIC9HvSfbDJW++9jkT+eCo3pr+zMYVsdzsK1bIUyepmy+LQd+ZIocajIJwSL9SLzb9kwCLLX+MB+/HLHPw8c6Iv1hqo4ga3HR3/D8M0vn3jWgidHuBw5s8RmquEVN2bkHHdz2p4AP0jbvNkzwJcS24J2Oj/nUjuSBEvlWVJsRX8/nVI5i0XPateHu7Q9RSrX3p/u71L4V+DZTCz/kyIlvRvRCbHgGKLgoQkyImnnc9NGnKWwYX7m7zk7bH7r+ZPWxqLkAeA+55sMTb663JjqzU0Ftj/CLdVWe12RpkmRBZR8AupxJvLvbtzp+tb7C432+n+Nbt414nTPAwRyZPQjorWm/DAKwoh84YMN4RtMLjsxI+cCqlNod+U5GrIu9f9hbZ2GzEPXVn/ZJ1af5uj/j4zew9LLVTC8ELCu6vbuu2sGtyUNe+m1mXb0BCX+MsS3oOODuLqQYLj6DENRqans/5aCAvIezFv6IP13Q17+eu82SUNvf/Q+PKiv5IXOu+X/48tvBXky2dSrVrcs50H43zffquKm6FkVpb3f89IlDcMGHgA/RNOHwJGTtGtab25HOkRFY3ef45YYq7zwsS68ffzTIWsvgCuRMUqJd1etY8nTEHV1JVsiYBAx1eGEwQCKqUaL1nKbugv1m3KlY9EwvBAgvT/JLdQeIZObSxw/j3VsHgV1cv48oekoI0wsBiy/7FTPnfxAbfntQkXrs960a2VMnfZi7ZnFVJcicTWvcycwvXsDSj64eoJ7K+52kBZ7J66t53RXgm0z/3E+h721o+EdKH+tLQqBxAHidammX5Pt2rn0Xnk/Q1HJSP9BpP1X97nlMRlj2dMTxOcsrDwzocoodDyCX/hwIZKxQ8bCix/HbzRF3bI1xPkFBqXWAq25fc1FFE0bSJzn43o2D37CfAF4h2bzZiceh/mS8Y1BXfr20JpPGL1/9MEsuf7j+YDfos5YVY6YXApZe8j1mzjuLTNOHUobesQc8U41wgUMI68JUJSK4yBNkzsdV/sCs+UVM5of9sooDerK6m16fpl53Dfg2A18dJHKrY81Jhaa9dJ1PnITNXUVgX48yFOhk7wDmf9eWOSzTxPOaLD1+9EGv/6YpWIFMCmYbY+XurTF/2hKzqidO09WJV6e1kqoI2KRTrr/EWqNVzmSh0ns755wTD3po7CeAl58maTjzfCSYWPcQUNUTZi3Vvm+x9PLfMH36SIHdgC0jUdQKPttBbF6NDY5P2JnHKAdd7FAoQmy7gT5EcgPZl72HUeKKw4bHgnwTV/0As+b/N979lFL7lqGEoys09cx094CvFuoOKhKNZUSSgJ2nc+2bMXyZbG4yff1NwXbvswVJuNgbwdefrPBvx+Q4KmvocYqRkQsVdFDDUa3pLzTJpu12ygM9jju6HX/vitlQGSjGG5vQGnuTJuycw1YigmqVsFwlrEbYKEacwwWB6Z18COVs9jfs15MWqicTBBDFdczfqWKsJa5sBk36tpZNHgXvoOjJT7OUrlhP2/zPI/YaiMcwqpWagMImsm4zYg6qY/tSwjycVNUhyJwBnAHx5cxeWCLW/8dNc+8Ykicd8Pz87hc4xrw4kfTVdT51CWFwFYqht6vuLVQ+ze9vqHq+8kSZ9xyZ5cRmS9krsQ6q6u4tuA1Kq1nAihCYJPGxNVYe73Os7HGs7Il5ouzBJSAnVlBjAcE7R6anj1x3D01dPeR6+gjLVYIoxniP9Atl4E0QSvnJtffd33rAbwGSMbP9CfD6CxbyvLoDguIJQktc+QVLL7s/TXa7UR3Ut9UfEXMJNjx6xFptdnV/L/v3Lcxa+BhijkfrLApYu644SjawDU7E2Cvwlbm0Lfgjxvwc5AZu/Nh924Hf+PDcduX5mYDd/z55GbmWq6j0JjPEI9QvWuvmXFPxXPNYmVmHZHjFgQEHB0mhIFbFaS1fxoB8kWz7Swb+WwPJBNwSgBNJcKzbKesrnkfLjgf6PA/3OdZVE5mTxJcXyKTCgFFM05YuWjZtpWVzF7necuLF1VSFjKAiqDGJrHY6cE2myRD1fY/iWVuTey9ufwK8AfV44Si0zsTAgsHH4LUESP886ehcmqYVvPXMWvBrTPB+XKRj5uXVyANYsAIx00eMhLkGfC72uEgRk8VmZiDMIK50MWv+HxH5NcRLufHyFQPgN0xfHuNsBlbE85N1b8HaK1NhcjOgCTZyTyoR6HXKz9dW+O2WiBdPCJjWYjk6K0wIDDkZxKvNdjwoDBCiJOAYafL7tsTK+sizuuJ4ouJZXfGsq3qcH1RwEMAa1BrwnkxXL60bNjFx41ZyPX2Y2KUAZ9DApE/RbchYEgIJb4LAxNXep8qBfGs4Kv79KKTttOijh6bPKqmf1HEguPhJhL8k+aD86HoRK0u1B+rNqHv/mLan1MDe8zt8/KERV8VLCAGS+xBXEm/XmFZMOAuYhaOHWQv/BPwKp7/mJlnVH7bm85apU3Xc9Nklnp3yo0dPQPWLKIKPJeFLGh33vMZj8XTFs7RcYelG4aBQODxjmZRJfp5ohIwRQpN4cJFCrFD1So9XumJlSwybY8+mWNkaK1U3iBRIEhdQ0pdKAnQSxUzYsJkD1m5kwpatBNUYjOCNwYfBAMApO03Pis1I7MtffHz+rNWpM+AH9yXvP4A3fUUTtB6QZEvrVkjzWGtRfy83XrQeuWT0c2jJE0wxehdx1IuR5kHSoYwJeQBuGd6vwwSTR6lHsKYnm0yfxGWfKJlKCyZzLnAuWi4ya8FNiP4YydxA6cKt/V4pMA6AL7mPNlOgacIkere40RZXV4Zqy3pgU1XZVIm4ZxuWlO3RkmGYzgbiW5P+rDrQNqLWYioRBzy1noPWbKCpqxdR8HZbkNsFZ1zVmyBr4qjvntj3fTUd2dx26Jr9QJe2dq2tOdDmdAWlft0oBvAPI/2q9Dr61VHAmzUIa9Pe0zEK14oeCoall60GrsNm2AsWnL3TlBUSpdK44ogrDmMnEmTfgGT+F1/9C7PmfYbZnzuJYtFTLHryeQsFM4ahrPLjJ1+CsXnK3borTcQjeWL8IMwyRjBWMEb6PbMakEna7rzd+9L3MqhA4r0mpy8MMLHjoMfXcNwd93HUqsdo7upFjcEFdlCIult8AurxGlm54tFr3rCZwkAqS689onn/E+LOmRAhU38oUIB1Q0K6sbCt9KG6FRljpcZ8jaBBv0JcKSNWxg6AU89PsKhTorLDRx4TnkjQ/El8/GdmLfo65175Ykoll1S+O+2oe8fT0s8T8080teTQ8SNnWQM/rwNTDTpMH90zvS9JoCUB5cQn13Psnfdx5P2P0dTbhw8M3pp02+gejXOaTJONXfyDhxbM/hmFglE6UEX6Cic8t2tN7t2D3ZP9w1wo6EihQcq2um7F2G3SaEKMEI35sEWp5CgUDDde9ldUv06QMaj6cSFlmVQ6DT72RH2p1xe+F5v5HbMWfZlz5h87UOAYLW9PhXZxdGoGkVcRR8qzSWugNh9mLc0btzDl7/dz9H2P0NzThw8CvDG7w2Y5bCgrQca6qPJwOZxwWf/arSyKCBqLu8LiX5Q8jDH7D+Ale15HjMFirO05q2Xc0EUVO5Je+ND/F3HfQ9jQ9tOujw9LphRqXp/QTJD5EKHcxqx5H+zn9ku8vZGeQU7v2ZPHgz+RuCroswjwwgBbjjj8vkeYctcDtG7uQm3q0e01t6YqYvDqfRX9yOPzz15NvtMoRaSE6yked2ZTzrxLRZ5MAW8/CmmlHIPG9X94CiATAJg8beyCyUpzFmhmPDhTiFLoEH596RrQD6M+TkJb1XEnYC5iUa8JN6I9DJv7CrMX/YRZC45JCS3sqISzNpiCDVvwnvESzu6VV5ck9Whds4Hj7lzFIU+uQwR8f46uLp/kTabJRN599qHPzfo1+U6rnYmq3NrCpAke/YINxUAKePtVDq/aXQXKaca1zgdPjwS26/kZFSuk5KG9ehCqh6I+nRMeay8v9ZAWX3oDPr4MG5iUWFbHo+uPiMU7T1x12PANILfQNu8VCejlR97T8+ZArE31DPfxGmEQYKKYw+99mGPueYRcuYILgyEk4PWgYTOZFluNeq978ICjP0NBDZ3tng6sFPHN0vypCVl7Rl+vU3S/Arz07Dcd3Ad0Dy1S12PhPYg8h+mFIKkKjTLY1FicjZyAqbFRjxMPoZRPQG/JpYuIK/+FzZh0/f043SoGwRKVHTY4ARNex8z551Eqjbynpzw7ZEJDS9PGLYlX99QG1AreyJ4VI3Z85rwJczaO+u5xRv6V4guqFDvQdowUibs/PeX8TCAXVSJV77XHe5OIj69A9x8P74YLKyibUizQOjkGJomS9XnkDjx6iMc1apavdVy+DJuV8VEgGDyf2p4ofi255JNE1SuSvgVrxllOb/u53bjqgIOwwY+YueDckQ9vowrq2We9ujSEPeixpzj27geS6msY1L9GqOqNzZjYx+sqmeBtDy2cvY6CGi0kebtNn5lyvMH8N0hgDQKsrvTax1PO3f0C8AZXvdYOmY+ph0/gvMdkDkb82WPSmlLKe057f4jX88bpgUmpmwqGpXM/i6++FXQNQc6iuPHr7YnFxx6RVqx8n1kLnp9UcOtdve1n3V1PFOk+l79TBWsQ5zn8vkc48oEnMKp1KkpsP7cuxooT+iLx737k6nPvJN9ptSNJUWnhiOaMN99sypijqs5HQSAocvek+fd11aYtzH6iRWvSm/PICIQNibKW828DlVHN4+U7LYhy0Ekvx9iXjrwK296sUartuviy/yXqOxdXvZ4gY7FB4u2NR+ATMbjIYcLDUf0G5xeaB/Q76mQr8rX98hjCpn0qj6cKgcVWKhy94gEOWb0eH6SD/PX37FREUBP4qnMffGjh7N9QKARaave3pnm7bskubM6ZGT0V76TWge+5rdaSsh8VLfI1Job76s52LJgEaOy5zFn4iv5k/ag21/qLsGGYhrPj10OoTTTcfMVKFl98PlHlX/DufsJcCnz4JNQdRwdexOKqMWHTy6m2XpIAdx3TFsUUGvJHPolyP0EmYcPbJ8AuIOzuY8pdDzBx09aRCWFTsMNYTxCaSCsXP/T52d+hs9NSLDqmY88pEm8pTJk7ISsf6K14RzL0YfuqLg4C/zuG9CPtF9YfNtyLi1zKtqH1I2tUjw2yOP8ZpheC9PNGFnimFwJK7Y7Z89+Asf9IXB6v3t3wjckASy/5Fk3mDKLKxbj4PmxoCHIWMTLI6xsHh18trupBLmLONVMppt5qvfKcNUoo9E/YgPFxzc9cic129TDl7gf6m4hH5DmlqogoNrQVV/nEA4tefQ35Tkt7u79lOlaWEW/uOO4tmcDM63PqFQyCZgLBex5siif8HYDOJILYPwCv1JmES656H6qrMba+e0pIktxBbgaZ5ssplRzTbxm5EaV8p2VZMWbm56egsnBQq82+kf9JZhyFfKflFx/bzJK5i9D4TFzlnbjKb4AewpwlCJMpzX7wGyvPTwTvlCA7EVf92Ag8j9NKu/kN5d7aBJSOX7CzZLf2cMzdD5IrV0YmX1cDO0QlzJqKqxQe/Nyrr0ylQr12Ys5ZRtxVnHJuLuDrRkhaGBP/WK0VgFuluLJbCxhJveb9xMNLweCmTzyN8DdMUP/WCMHgIo/JFJi14O0sOycm32nqDkI1bdgzrpmIib+DzRyHi3UfvJeDqNU7LUsv38KSS7/P4rmvwfEyosp/4Kq3g8aETZYgYxIKXHVjEvbWUhfwBmZeNSUB7Tp5efl0L3p+j3f3EGYZl/2KClhLpruXo1c+SLZSwVs7YmGsiFEJs6bqqv/x0OfmfJqCGkp5r50YacdtLhx/RmjND63IhMijMnAGTBSpCuZ6AFYOnMH9py0lAR9Qbh0hgS9BvYAPEPN1Zs5/TzqXqfUZSE+BodTumHPNJA6MO7GZGcRVt0+EsjtvXRkAPhCWXnwXS+Z+hqcnvhzVs6n2FXCV36GumyBnCXM2Ab9azm80Ql8RvFeC7CGIbevXSqnXyGNnp6X9sG6UHxKEMu48PE1IOoNKhaPveTj17OwIeXZeRQwEoSn76mUPLJqdNBZ3oNopRtpxGwvHn5oLfCk0Mrni1NXATsHnApGq8w83e//bweEs+xUfXj9XG0tw5T6Maap7k66IJL/T5rD2G7QtPJHqwUVK7eX+EG732HaFQiFhUS6Jo4Rj1oKX46KvEGRemIDdmKvr1RH4UnLOQsEk19weAbelr0/zqvlTkco5IHNQfxY2cyjGgo/Au0QEXWrSzCOUqRdRkOnAN+pK9roi3Z8u/i69W/+NIDMJF/lxQ/BhBHGOI+59hKbuXnwwYmGsFxMYRXzVRx99aNHsLydEnqiuFCMl3NZPH3tyRvRnYWCm9EXqUqmMgYRrIBBzvRQf3ayKSan99jfG4zRv9PLulfxhwh+w4auIK77+gJGy96tAkL0cnn4VMxcWWXrxrwfpLEi/xzmkqJJnCLFnwtWW7KrpVx1NJvwwwkexQQtxxY2UzgEjRf++q0SbA+8ZBPjtjpsvWQmsBBJmkzA6Gx/NRvkHrDkOk7H4CJzzQ6jg6+vlCSIvIF/IUEpZcuqV10yKF4/zk7XXkm36FL2RHzfenREmP/QEEzduSauxIwJ2ztjQOuipEF/w8KI5P+hnLc5jpYTbWpgyNRB+ngnkOT2ROjMI7DTpszPlqo+9t50AtA+NrPYv1bJ8p6HY7mib/yPg3JHzBNLu5rjiCDJn4OPraZu/BPS7mOAmbrzoqSEiM9tXkxObc00WH52G8EaUtxFkjsRVExGbfQnsUEm0Lmq6F7vMLqz9gD/U8/PccsmjwKPADzjvyoOIg5cTl1+L6qsJMsck3lKUjvrV6T6LCkn68Gh6J04CnkzyeHViS+5ImXd++uCX6NF3kclOoVrxY5qySIsUE1ev55An148s2IU563y8tuz9ux75/JzFSZgvrgZ2XZ8++hSD+WVTIMf1VNWZ7Z0VnwuN7Yn8ba1HHnSbJm3cbv8FvFpYK+ZnxJVPYsNjR1DlS9LqbfL7g1wb6ttw0RpmLVgOeidqV4FbB/Sg4hHNpPKGUzByCj46DeUFBDmDj0iojMSMmfbsnoIdorTNPxOJY4ofX74HwMf23mHBJHrDK5TrP74JuB64njnXTMJVzwd5HyZ8WQJQ9aSZV4BWKhwMPEkBKNbLyxNPhxre9Nx1dK79D8R8ByN+zLJ5qv1FisMefnJABbv+FptsSxBH5XvLvvq2R685/4609aQf7LZ86rgzQ0MpY+WY7qr6YcAuVbBVRPiOXLA80oOwMC4Bz4SjFtYWCobixRuZNe/rGPufI67y1S8tWHaICMYejgnOQ+Q81KXpdq9Js6kYjAWTSWoc3oGPSaiLUg63fcoKBsQz+6ppqNwImZC2RZ9kyR+/QLHo9iCnOfRelgYXdEomSQNcuB74FvnO77Llsfci5kpMcDAursPYVm2CQEOsnzBiPlVBDSs6vs+0D7ye5olvGAt9i/5AxSuTH3qCTLVa/167tO3EZJuDOK4s7g7D9z45b9YTg1pPrLTjuj5z/MyM6A8CI5N7h/fsEu/OivRG7hEXxD9Nw1ndnghxXJhMGqSzuvu5oXyn3eVxn2K6c+Po60SVJ7CBDKLwH9mOfTBorMRlR9TniCOfzr9K/73wUUJKGfW5NCTT5N/ucxxpQn6aML0Q4O1CbPYA0CaCYBGzz7qOmVedkoT1UocqdlrprbHVpAeGxXO/ho9fi/dPY+pJNS/gR+js1Ehqi0VPLvvv9HU/QSZnR50UIvXuJmzYlOTtbN3BzouxkrSdVL56X2vwuifnnfME+U6rpXavBUTacV2FY98aoj8zIpN7I/Wyg5y7B4JARFW+d8AnVj+teawMc67NmPOQeQfqp/Laq1uhQ3YNuGotDJoIddQOzq57ecLNV6wFXYQJZHRnF1PutZrQzFBZAB3m/5d9Nl9aaneEB/wrQXY2ruxQBVf1mMyrMcHvaVvwKWZee0B923dqbS7A+68NWXLp7/H+C9iwvr2XYkZuzxTF06mW1x78GFr9AN7HmFGesRUB5zh49br6t7SrOhNmjRfprXj3kfsXtn2I4jllCmp0arsKqBTxXR3HXRiE8gMRmVBx6s0OUjkKmjFIX8VtsEa+AQhTh3+4mTHnH/ORYoMT6DOzE1rtjjCp6KkMvAqm35PL5+3AphZl5oJzmfO5r9I270W7rEVQ7KgpjH2NqPxXgowdQ1ol2eb1LLBCAnZz5p2A1SLeaUqrnniySXjfSpj9NKbrt7QtfAenXRsOBb69HtBXNh2UpDAsy/EOpG5kGQ4x5RFdwnZxFG4JaD/meuLyJ8g2JSLdo5HQSxlQclt7aN7aW79JClVF1Ztsi41cvKpPOO/BRTOTthNUdKWIFPFamB70fPq4hS1Z+bwqEnn1shOsUkUzoRGPfLf5U488qgVEisM/3IKx14SQJHcl5rPMWnA3pbn3Do49B6p1g/40/XMHknUzQN8NvIbMhJC+zU8CdySJ7F35zIKw5JIeXrVwLsYtTtTd9dkloDKWymUlBGfmEWQmpwBnh4T36pWo7LHhKcD3OKTr/bTN+yLVnuvSvsVBVdk9zPOtWyGUOjyzFk6oz/hdOvWlWsFFXdtv03p7ejMcnWppl/l0rp5C8wEfoa87Bg1G+gmsCC1burDe1St358RYS5CR2FVKm2z4b+sXnLOGvFqK4rWAlSLx1sIRh/YFj36tOSNv6K2oTyutOwW70Ir0VdzTVvRLz5SQ3/WFmzwtYstjlRFIJRlcpNjwebhoKW3zFoEspiprCOOIKAjJRRPAHoG3UxF9GbhXYuzzMAFElVSBSvweUZCX2m+h7eoFhC2XE5fj/a5yPRJzvgmpwTuR4I077heUpIqdVMnBZv4B9f9A1vyFtvnfxlR+RvGTTw1JY0zvsMzAJyJBsq3w8NDKQr6UpgtE0fn/mAKV7t3+leT4iW4hazclf9ehI4d6orRr4qVuWn0RyIG0THwHvV0p6MkI1dUT+ZFcd18dnv+qgDdBzsZx1OO0+skHFrZdU8vdakk8iUcWdxemvMQG5hu5jHlRT9k7BPuMt0vw2VBsb1m+1vwfjz6sBcyOvLtdBbxkQ5XaHW0LutIF0DrnCwQXKSY4ChMsxJXLZHUdaqtkCfFBKyIHEYSJuq93SXLfxR4xisiegVSpPZmHrE4uIhteim06l7jP7XvV0H7lFMbUQy0UDMV2z6sWHoXyWUQVeYbv01/FrnpEBZt5KchLcXIFbfNvwOgviZt+x03yNMuIWbatW1UwFAarpUmyDrWpjZnzP4IN3oKr6F7fVyX18GQ1TbdtGjSnPbITKB0KIjG/1n+lZ42haeI/0dflULUjVsvyniCK2UvFHSdirIRN1sXV31etfOzhBW1/AZVEOzbJ11FEuzqOfVsQyBeyVg7tKXsnuzAQoOAzVkx32T8pXr+Q7jatg4eX9lLBxgHGYKHuoKfOEztFTA5jptSc60SF3CeHoiaJlPSj7a38n0JRWEaZWV9+D3HfLQSZE5LDtw/Np6oqxkji3Pix78s38VUEzUenfYN219t3JGmqBrD2SEz4L/joX7DVR5m14DZEf4/nDpx5kEOOWU+pvQpFP4B/6Q9nX3kQufAliLwHI29P1kS1Lt6KWKB6fz/NVbHoR0VetFAwvEYqXLPqXzjS9NHU+l7KXR6vMiIsycqe61AkxRU1mSbr4moljsvzt5Q3X73+K+3dSQQgXlciUsI9XDg2N9maz4SGuSqwox47diihIRJ5d2VL4bE1Og0r2/Td7RngFTqEIorIUyPsQJjUgdQ00T0YcKX/UNT5WZaGYY8z++p2nLkemzkcV903PD1Vjw0NPn4a1CFmcn0bbXfHuyt6Zs5/IzZ4ezK2twcPjZrH52Ptbwo3wbGY8FjUt6MRWL+eLY8+Qdv8dYhsAi2n26QZmIRwHCLHYzLgKoN0A+vCfQiwfNTp/JPRM0Gkgur7+Mna9WRylxNXwTsHdd6rRohrkorsVkePExtYCTISx5Xfx+IvfXDRnD8ke0SNdoinA5Ei7ulPHzMtC19uzsr03qr33iFmF5vqveJbssb0Vd1tzS3+m1rA9LPO7DXg1W6s6kOjROKwTcVyhPdVTYqvdNlfaZv3ZlR+QpA5PGUiseMY7Bw2Y1G3ETX/BP6TBOFkIv/MoeTuWfzMYNehTG89FMM8RATPXn6HNMcH4J1PKLDSh56xkxA7KdGRl+1V5NQnDdtxJSVXqAvYKWIMrhIDf2CshOQT0AP4OJ1rHiEIFpLJtFDtqx/opT141aYcsHnXK9dgTabZxnG0NvbVeQ9G8Zf54msqg4b/JR3k1+5PH/vuQOTqbGgm1/J1RnbZ+VRrIIp95JSPy8VP9A3mvNu5R7V7K3EPLmLfGm3aDSbefN6y5NLfo+58fPwQQc6mh13HJdgFGYt363HRG1ly0WKE1ro2h0p/zrn8zA9EUbL+MwTZE3BRvcf1zKC+xGRUzEW+v0F78CuuOnzs+4lZ6xfiKSZQ0Luodt85kAMeE9ADVUP74dfiKq+mWr6Xpol2AO3rY70HTEDlGVpSVD2omjBnVYyL4vJ3ujL+lQ8uaFtUAztF0IKIlHAbPnH0UT2fOfY7ucB8yxiZ3FNJ8nWye3jsmzLGRDHXthYevaUzn2ha7NpG2hXrF6Yp34v3m8aninydQI9Oy+K5y6m6WbhoGUEuIeofPyIzCsQEOYuLHiSuns/Sy5Yx55qJiceudZ6D9SD07NS7K7U7Zi6YDcH70vynjHzzdg0Et31hR6a/NM2Tqv6MZcVyKs6tY+bpSdqcnD/qtxidTrnrO4RZQ5hNRZH24nxKQh/ce2Ar5ZYmxOtwm9CheJPJGWxGqnHlpqowe9WiWe9efVXbKvKdVlVFpyW9dVLEdxWn5FubglubM/Zd5Ui1EqvKbj6UErAT21f293jNFFWRFVN3/T6Y3aLkXhI/Cvp3TKCoPPsAD4A0vL3l0gd5estriPuuQQLFhibx9sYQ6GugG+QCXPVmVNu4+fI/UygY+qIMqhPqkpsfSFsL3oMJunbMglJUZl51AMIijLXp8jzLehlVMdYQlTeCfD9xAqaO/f5vl6RP701HrOPNh7+bavXtRNVHaJ5ok1G6PWeGFu/xmZCNRxyaFC+SVhVNQldVG+YsYWiiuPqHSF37/RNnzXpo0ayb0KQC20k7IqIJWedzpvQVj/1ONrCd1spz0yqsmN1MeSioMRA7jQT/0YnFVRtoxxSLu+6MmN1jDC56VBYnT3B9lgJezdMrGJYXe1l8yb9D9EZ8vJIgGyTeLfGozN8Oaa9Uhw0NYpS4bxGVreex5JKHef/7Q4pFjwkPQOSgtCIp9YtpfUTE1qGe/qBiFigmKBBkpiaFnmdhukPx2IwA32TJJQ+Tz9tRqc7uKuipCqpC++E/JOo5i3Lv5xDTQ1OrBZMA3256fJqOlm0+/BDdesAEb6LYiQ3EZJosYiWKKsuqPnrrqolbznlg0awSRfH5fKfVjg5RirSXcFqYmukpHvuhnPV/yuXsu6pOtRzveB52F3aja8oYU435r6bCYzfVmFR253fsev9a/2aPf0bExzGmpe6MwYw3wlAV6BBuvPQXnH3l/9HkL0T4MEHToQNEk6ojyLLrU4k6SxBa4upK1F/Okkuu6+9B27QyOXhhPAWRifW7J7WpAunFxZuGmSqQfq465diE4aWuFdHxYkkVPOp7HGMXgQqlJM5n/EhJJvchmcpYC1xE5+ofUNW5GHkT2daQci+oc0mlmR23sqimzD1pmBgGdu0pJ0vu7gcJujZvrrrqbxDzrQcmnntTjeMwn++0nVNXKNPakfbEEegqTjm3Yno+1RzY6ZFX0sKEkT1MNyjELVkJusvul6163H9p4RFDcfedjmC3yuKFgqF4+T3MWvArbOatSZ/Vs4VifIfiP5pUcD++Cehg9ue+jSt/ANV3EGSPShlOwKtLo8A9nYvV5H+i/SBqwoQuKipvxLuvImYRSy7ZmMwLdyiIh06bEIf6aZicDFQm63DtYgT1m2mesJHtpwq0/zpF3ke0tYsg+894Dz7eR5u3d8z3i8pl3HjRU+T/aJMIYDxmY1Jvr1QytB+5HHgbnU+eTaX3g6i+nqaJzcRViCpJsUHSSZRaRKAYjBWCQAgyyZWXe3qrAcvXTZrwiyM2rr7ugc+/cdWAvn2nzVNKaIVT8OkqPOcFgXVzEXl7NjBBb+Rdeir2eD94xU3IStBb9nfh7fukuCzWQuK6jhzgDZXp/Dxx9Q2ICeHZ7OUNDnFTzrVS+yPA5cxedA1x+bWIfTPqX06Qa06SvXGaOvG6faFDdty5LpKochkr/ToNLn4QH3di9RvccOmDQ4kzi9t43pw5MARTHwcvlVN4itPXbuH6YacKkj8vvngj8G5mLfw9yGcJc4cSV3z6VfblEDcmaAqIe77C0kt/1D82N66f0ZLk2VQNHUC7/A74HZ1rTqFvyztAXg/yXHItBjuInEY9RFWIKhUi9wRR9Q68/h9GbuVNh/99C7BlG9bpzlK7r4HO5s+e8Nyscx8S9D3ZjD2wr+Lpjrw37F4Fdjiwa86IrUT6RFn82w4pPrrumcbHnilJwx41mLbN/xph0/sScsoxfJorjjBrcZUruHHuZ0d+UxZMMhw/6CnfNv8FINMReSXqXwIcgw2zif6tDBop1IFll20A0EWgvgfVBxD5I3AjTfZWfvGxzenj1Cb6ukNAJ8mhnXflQUThckxwfNqSYerS9hI2WaLeTpZc+pb0d/odV3M7BIqemVedjAnmY8PzUA8uHmFhnZEGu77fkGl9M79aXU69at3H6i2Gjo4BtujvbZhIrvJCsM9H/BGoyYFUMf5pnDyBxI+gzQ/RfvAWtp2RrumsDLItheNPzFi9QIR3ZTPm0ErVE3tq4ete3fMa2MWxX1uOef0BxUf/tCd5uzowHqsQzv8P4vK52MxzRqDvanzn9kqDWHZL7Y4ll9wN3A18mTmFibiW5+DdCWh8Al6OBjcZMRNAcyAW1QihD9gKsh78Y6g8iMj9HNj9EKXigDhMPm8pTVVKRbfd/qlxzlWCcwiC40eGrt7en36WUGrfhdD/8nuA85mz8L2oXEHYdDwunQZIJi9k3FdkFU/YHODKS0Dewa8u6E0bfve9Qp3UtERSj09kK/Db9LWzZRBKGFagFMUPdiIUhIVH5/p67FXG6EeyoTF9FU9PxcWoWKlDSsUrbkLG2Mj7J8ue/AHFR/9UY0Dem98b7NGISwFDsbiGtvnvQ/11GNOM92MHeoqv+5M38WR1x71Ww8kK5j03yFbgjvS1559d+30lcTsvJKkgC96bNNnXla7e4GPA371boX8tArjh4m/wqoU3QPljKO8jzE1MgM+PX49P1WGMJchYot4fYDMf4sYLt0LB9APHPvuclmTmuJbj61fIKw1Vy1uB0oH2h8Y76kc/5omq3DflF95xXK/3r27OSliNJIi8ek1SOUb2YNJG0yhiQs7YvrK7qxzZtx/8nw/d1Znfe7Dbu36pfD5J3rbNewcm/CYQjkGy2qPEZFsyVHs6WDy3WPeQNrnO3RF6HpAW7JdbHDYUEigI+ZXSv+FKKxR2BrLD0DDNXHAu1tyAelvHObw0L+vLGD2TGy79+24Pyg++DzMXnoLRC4G3EGQn4KLa/Kek42cy5m0nAtiswUddePcZllwyf4BQtrhvg90I29bCca+0Vv9FhPOaQnMoIkSxUnXJmM6gtHJSIR5mQrmWNW4KksRxNdYfxM5c1Fp8aF1nHttewtWr0Yq9B72r3ozJXou1BxNV3MCg/whtT00XyFqLCcBVHsDF72Tp5X+qG4PF7KtPIux9nF8Vewcd4Hoo3O+9toJqAhPTv50l8/QygvAM4qieFXOPCQwuXkm266XJGvQz5uxe6qPQIf3341XzTiUI3guaJwiPQAFXTTwrRJA6SiruaugqGGwmIQXw8WKMfpIbLvnLQC+jaAPSdrCCBQwdaG2Gta9w7HGEzPFOzkM4PTRyeBhI/4ii9+AU/KCWQEGwBqxNNOz7Yn9X5LjywI5Hf1T7jD0tUNQf8AaD3qwFp4F8Hps5G3Xg4poATR3oy1UH2jXEYlNVL1d5BOF/iKvXctMnnt5rMKldy+z5MyD4Beruwes8Djr2F/3eyl4pbdVp3KuWO2yb/zmC3L/XrxVlcMEiZ4kq32XJ3H/eay+nUDBJUTn9HectPIoqbwL/FsScQZANkoH/KAl5+8fH6gqA6YMyPW3GWmwILgZ1f0L1GpZ0dyYyA/nx23oyXoEPGAxMPYVjjlRjXmiUF6mRacBxoJNQaQVyiFpVVEQqiG5S5W4j+rMtmys/P2Lh2p4aGdeuEAKMLuANDl+mF3JkJ/wrykexmRMxZkBqcAhvnciwn64M7Umr8eSJSfrRxCQMGMqfUf0h5er/8rsr1tcv9OjXUP05mabX4VLeAO+WofJlqluvY1mxPLRqNYqVu1SFHYC2eZdiM1fjYwd17oVUPEHGEFffw5K5365bmqBQMKwcVOHOd1o2P3o6xrwa9bNBTsFmW5IBD0+/pmx/e4/UnIJnmCYRTeUUdQitvAlSQhEFX92Iys2I+z4Tj/tNwq23h3q5DRsAvmkIefy2QKUFzKam57Rm4rg5tjTlosCqGO9DKs19bJXiA1v739uJpR0vIzCrLHXnQwOYXjiQ7MTXgL4B1TMROYYgm7JvJ2H9wF7U7VmhpPZgT/vaXLwVuBdkCcZcz8Sj/lx3j6ufz+3q07HBb1HJoC5pALbZRHHeu9tRvo2r/CRRPdu2ZD8i4JfkBGsFo+mFgOyEIib4BF49uDqHgaqIFdRtxsWncdPHH6p/Hqsmoj0IRBPwOxnVl2HMK0Bfgspx2KAVEwyiftIBUthhz8Pg/WNqM6CJLjA8jsjtqCzFBku54cIHt3lo+3HJjLPvdWoLBYSVCHlgRaJCtqdgOT4Bb9twi/4etcnA80FOAT0JZAqih4EcgNI8SJBEQSqg3Yg8jfIk6EPA3YjczQFT7t/ugNQ1tEwPddv8/yFs+tch/YX9Se0wISD10eN4/QVoCZu5jRsurAwBzlsxTF6plKZq2ru1qzzZ0r8U+fakkjb4ms+d/1Ks/Cc2MwtXTb3gOue8VF3CxFK5jsUXv66/v26k9l+twLOtB3nWwiYm6rF4TsToyaicgOixKIchchBoMyqZIaF8EkVUEOkGTfaQyEMIK3FyN4ZVaZP0tj2VDaAbDRBUoGMYzBmUB2QUiDZHLs80TKNi/0Y7/8gc1e4ccTkEIDPBAxVaN5aH9KEN3/yodd2gtRaUWQtPAP0LYg5gQCB7W7aStFgSQlwGWA7ya4wuJuPu5JeXde00gb8jltwdXVe+07LlsTOBf0HkrZiwJaFgGrHqpsdmDL7yLm685HujOF0wAH473DfAnI9miU6cgC9PIBPkhih4xT7C0keT7WLz5m6WFeMdtvzs7DMa9qw1GZ0ke+qt7HrYN0xrR51BbthwdsFnyeQ+vgvTIz5VwEoS32IT8FO9F1iO6O1gVmD8Q2R0Hb+8tHuXPdF8Z4Ytjx2GmpPBvRxMG/gzCXM27WMbOb0NxWMDwVUfw8enJYWgPanO1hkAd97es2t7jxLDTKo0rAF4o/nZuqOvpKOuxdA2fzLCXzHBkbg0d7fLTc8p+JkATDBAMe7dVoQ1qKxFdAPIRpQukJ4kI58WZfAtKAcichjKEYhOQeyh2DDJP9VaN0a6YbdWnY0r/8niuZ8ap9XKdN90SL9a2WAr1kgORnkfNWyfsGCsw/oxt5Urky9h9B3YpqN2S2lrsNoWJK04LhqsvTARMRMRcyK75JSl6mzepcPcZZfO3ZoRb+jWtPcuKm8g5OvjhuRyx/tGdywHW2yc7IaNOw9v/Fz/a6+eQJ/9EzaYWt95VE2FoAe12ewSffloNuBuQxYQlxPvrtGe0bBnoZn9+urznYk6fTV4HUE4tf7D9yKp9KQdXn9hWE0GMwZg57GhJS4/iKl8IaFubxyOhjU8vGfftZ92bcDBW28lyL48kWV8NhOa7oRiywaGOHorSy/p3Cd43xrWsIaHt1tjZIl3d3DvTIx9Ga6q+yfY1QoV1W+y9JJOCmoaYNewBuA926zUmSixqfsgJpBEX3N/BLusJer7Ky3h3DSUbVQ2G9YAvGeZd2eTmdnPnYGR2Yl3J2a/AzubsbjocdS9I2FW7pBGn1rDGoD3rPPu0nYLjT9AkM2k3p3sd2Cn8Vpi9xaWXn4PhQbvW8MagPfss9rBnrnwFIy8MaFWEtnvcnbePYr3r+OmS/9IvtM2WlAa1gC8Z7OJOwITTMSGidJOMnj+7A3nkjlgnwjzVP6C87NYcsltFAqNIkXDGm0p+4XNmjcHzCWIeRUmTEe4/L6qsrVzZt8E2EHj/6HcdSnLipsb9OUNawDe/mgzF74G8R9EZDZBLkw0YZ3vF8TeJ8EvBTpjE4ZoV34Ar59iySU/bhBdNqwBeOyXkxZ2G+6+MzHyDpDXYcJjUu67lHY81U8f12kAVVQ8KJggpTCvPo3X/8GWF3HDFesbWg0NawDe/r4G+bwZQgL5mnmHE5vXAG9CeAUmewCQUtW7hBpqYOZ1LNdRB2k1gJiUrkogrj4F/AhXuZabPrFqWIBvWMMagLcfr0WhIEM0FwDOXXAixrdhZA4qL8UEhw2hgBqquTBIb6GuQJiSD2yj1SBiE60Pm4JcpYzq7WBKVKOfsuzyJwbEiRpccA1rWAPwdk5VP5T6e841R+MqL0XMP6ByJqInIeaQREUtpXbqf+kAV97wyy7Dg1o/74CiKWuKIKmYEf0vBOIKoKtJRL9vwXETN3Xd2V+IyOctU6c2mH0b1rAG4O2u5sK2+hkqtC04DjEngX8hqtPAPA84GjgYkeYkvDTDYJru+HZsi4UDZKJ9wEZEHgfuA70LzF8RuZcbL3qK7XKTK7RRgW1YwxqAx16rbQHD58JUaFswCTWHYfRwkCPAH4HqJJQDMTIRlWaELGiIEiaeHFXAIfShvg+lC2EzIutRWQtmNdasocpabt60fnsgG6Ihog2m34Y1rAF4I7B2BekHwNEUhakJ0TR0GhrWsAbgjbnewnbqZKWELn1Ab0GfUath5UpJxGdgGxEbGh5cwxq2Z/b/ASv6jzLX/FQxAAAAAElFTkSuQmCC" alt="tgs"></div>
+      <div>
+        <div class="eyebrow">O&amp;M GPM · Energía Argentina · SAP-PM</div>
+        <h1>Avisos de mantenimiento</h1>
+      </div>
+    </div>
+    <div class="controls">
+      <label for="selAnio">Año aviso<select id="selAnio"></select></label>
+      <label for="selSec">Sector<select id="selSec"></select></label>
+      <label for="selSis">Sistema<select id="selSis"></select></label>
+      <label for="selEq">Equipo / objeto<select id="selEq"></select></label>
+      <label for="selCla">Clase<select id="selCla"></select></label>
+      <label for="selRes">Responsable<select id="selRes"></select></label>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="bar">
+    <div class="chips" id="chips" role="group" aria-label="Prioridades visibles"><span class="lbl">Prioridad</span></div>
+    <span class="lbl" id="corte"></span>
+  </div>
+
+  <section aria-labelledby="hRes">
+    <div class="sec-head"><div><h2 id="hRes">Resumen</h2><p id="resSub"></p></div></div>
+    <div class="grid5" id="cards"></div>
+  </section>
+
+  <section aria-labelledby="hSec">
+    <div class="sec-head"><div><h2 id="hSec">Avisos abiertos por sector</h2><p>Sin "Fin avería real" cargado. Ordenados por prioridad y antigüedad. Se marca "Programación vencida" cuando ya pasó el fin deseado y "Cerrado en SAP" cuando el sistema lo da por cerrado pero falta la fecha real.</p></div></div>
+    <div class="grid3" id="sectores"></div>
+  </section>
+
+  <section aria-labelledby="hMx">
+    <div class="sec-head"><div><h2 id="hMx">Prioridad × sector</h2><p>Abiertos sobre el total de avisos de cada combinación (sin anulados). El color indica cuántos quedan abiertos.</p></div></div>
+    <div class="panel tbl-wrap" id="matriz"></div>
+  </section>
+
+  <section aria-labelledby="hRep">
+    <div class="sec-head"><div><h2 id="hRep">Prioridad × repercusión</h2><p id="repSub"></p></div></div>
+    <div class="grid2">
+      <div class="panel tbl-wrap" id="matrizRep"></div>
+      <div class="panel"><div class="ph"><h3>Abiertos según fase SAP</h3><span class="cnt">estatus en sistema</span></div>
+        <div class="legend" id="legFase"></div>
+        <div class="chart" id="chFase"></div>
+        <p class="note">"Cerrado en SAP sin fecha real" son avisos con MECE a los que les falta el Fin avería real: revisar y completar.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="hGr">
+    <div class="sec-head"><div><h2 id="hGr">Evolución y distribución</h2><p id="grSub"></p></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Altas y cierres por mes</h3></div>
+        <div class="legend"><span><i style="background:var(--p4)"></i>Altas</span><span><i style="background:var(--e-ok)"></i>Cierres</span><span><i class="ln" style="background:var(--ink)"></i>Abiertos al cierre del mes</span></div>
+        <div class="chart" id="chMes"></div></div>
+      <div class="panel"><div class="ph"><h3>Antigüedad de los abiertos</h3><span class="cnt">días desde el aviso</span></div>
+        <div class="legend" id="legPrio"></div>
+        <div class="chart" id="chAnt"></div></div>
+      <div class="panel"><div class="ph"><h3>Avisos por sistema</h3></div>
+        <div class="legend" id="legE1"></div>
+        <div class="chart" id="chSis"></div></div>
+      <div class="panel"><div class="ph"><h3>Avisos por clase</h3></div>
+        <div class="legend" id="legE2"></div>
+        <div class="chart" id="chCla"></div></div>
+      <div class="panel"><div class="ph"><h3>Equipos y objetos con más avisos</h3><span class="cnt">top 12 · repetitividad</span></div>
+        <div class="legend" id="legE3"></div>
+        <div class="chart" id="chEq"></div>
+        <p class="note">Avisos repetidos sobre un mismo equipo son candidatos a análisis de causa raíz o a revisar el plan de mantenimiento.</p></div>
+      <div class="panel"><div class="ph"><h3>Tiempo de resolución por prioridad</h3><span class="cnt">mediana de días · avisos cerrados</span></div>
+        <div class="chart" id="chTr"></div>
+        <p class="note" id="notaTr"></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="hDq">
+    <div class="sec-head"><div><h2 id="hDq">A depurar en SAP</h2><p>Datos inconsistentes o incompletos en la bajada. Corregirlos en SAP mejora los indicadores del próximo corte.</p></div></div>
+    <div class="grid5" id="dq"></div>
+  </section>
+
+  <section aria-labelledby="hTab">
+    <div class="sec-head">
+      <div><h2 id="hTab">Planilla de avisos</h2><p id="tabSub"></p></div>
+      <div class="tools">
+        <input type="search" id="q" placeholder="Buscar aviso, descripción, ubicación, orden…" aria-label="Buscar">
+        <div class="seg" id="segTab" role="group" aria-label="Filas visibles"><button type="button" data-v="a" aria-pressed="true">Abiertos</button><button type="button" data-v="t" aria-pressed="false">Todos</button><button type="button" data-v="d" aria-pressed="false">A depurar</button></div>
+        <button type="button" class="btn" id="btnCsv">Exportar CSV</button>
+        <button type="button" class="btn" onclick="window.print()">Imprimir</button>
+      </div>
+    </div>
+    <div class="panel tbl-wrap" id="tab"></div>
+  </section>
+</main>
+<footer class="wrap">
+  <div class="fcols">
+    <div><h4>Estado del aviso</h4><dl>
+      <dt>Abierto</dt><dd>Sin "Fin avería real". Inicio y fin deseado son de programación, no cierran el aviso.</dd>
+      <dt>Cerrado</dt><dd>Con "Fin avería real" cargado.</dd>
+      <dt>Anulado</dt><dd>Estatus PTBO (petición de borrado). Se excluye de abiertos e indicadores.</dd>
+      <dt>Días</dt><dd>Desde la fecha de aviso hasta hoy (abiertos) o hasta el fin avería real (cerrados).</dd>
+    </dl>
+    <h4>Repercusión</h4><dl id="defRep"></dl>
+    <h4>Prioridad</h4><dl id="defPrio"></dl></div>
+    <div><h4>Clase de aviso</h4><dl id="defCla"></dl></div>
+    <div><h4>Estatus en sistema</h4><dl id="defSt"></dl>
+    <h4>Sectores</h4><dl>
+      <dt>OCTY</dt><dd>PC Tratayén</dd><dt>CCSA</dt><dd>PC Salliqueló</dd><dt>TERC-NKTS-xx</dt><dd>Gasoducto, tramo entre plantas (AB, BC, CD, DE)</dd>
+    </dl></div>
+  </div>
+  <p id="fuenteDatos"></p>
+</footer>
+<script>
+/* ===== CONFIGURACIÓN DE FUENTE =====
+   Opción A (recomendada): URL de la aplicación web de Apps Script (ver Code.gs).
+   Opción B: ID del Google Sheets compartido "cualquier persona con el enlace puede ver" (lee la primera pestaña).
+   Si ambas fallan, se usan los datos embebidos de abajo. */
+const FUENTE = { appsScriptUrl: "https://script.google.com/macros/s/AKfycbxOXhy4tYRk3E2kFRAHagwVr5DkXL7NMPto5ReOFgPgre5C8kjIOJYVZctNG0GTnYw3/exec", sheetId: "1IWvlEuUu1TPaKqTFmfAmJDuk-u5nZdtsxY9B3FHC9i8" };
+/* Copia embebida de la base (respaldo) */
+const EMBEBIDO = {"AVISOS": [["Fecha de aviso", "Responsable", "Clase aviso", "N° Aviso", "Prioridad", "Repercusión", "Inicio deseado", "Fin deseado", "Descripción", "Orden", "Ubicación tecnica", "Denominación Objeto tecnico", "Equipo", "Fin Averia real", "Estatus en sistema"], ["2023-08-10", "44528", "C2", "10110846", "", "", "2023-08-10", "", "PM01003-falla energia en PM", "", "TERC-NKTS-DE-ME-PM1003", "", "", "2023-08-07", "MECE MERE"], ["2023-11-06", "44528", "C2", "10112279", "", "", "2023-11-06", "", "PM1003-Falla energia RTU", "100928383", "TERC-NKTS-DE-PM1003-FYI-4041", "", "", "2023-11-05", "MECE ORAS"], ["2023-11-30", "45155", "C2", "10112534", "", "", "2023-11-30", "", "1001 falla indicación ZT-3021", "100934169", "TERC-NKTS-AB-PM1001-ZT-3021", "", "", "", "MECE ORAS"], ["2024-07-11", "MCC", "C2", "10115528", "", "", "2024-07-11", "", "Soporte puesta en servicio GC1003-GPNK", "100989589", "TERC-NKTS-DE-ME-PM1003-6000", "", "", "", "MECE ORAS"], ["2024-07-30", "44762", "C2", "10115784", "3", "", "2024-07-31", "2024-09-28", "PM-1003 - Modificacion Soft RTU", "", "TERC-NKTS-DE-ME-PM1003-6000", "", "", "2024-07-18", "MECE"], ["2024-08-27", "44725", "C2", "10116160", "", "", "2024-08-28", "", "1001-MTA presencia aceite linea muestra", "101002518", "TERC-NKTS-AB-PM1001-AIT-4002", "", "", "", "MECE ORAS"], ["2024-10-17", "44762", "C2", "10116736", "2", "", "2024-10-10", "2024-10-14", "PM-1003 - Croma con valores fijos", "101015545", "TERC-NKTS-DE-PM1003-AIT-4041", "", "", "2024-10-14", "MECE ORAS"], ["2024-11-08", "45385", "M0", "10117126", "1", "", "2024-11-08", "2025-01-08", "Serv. Bulletin 6-3-100(Ver texto amplia)", "101100311", "CCSA-06000", "", "", "2025-08-09", "MECE ORAS"], ["2024-11-08", "44712", "M0", "10117111", "1", "", "2024-11-08", "2025-01-08", "Serv. Bulletin 6-3-100(Ver texto amplia)", "101084147", "OCTY-06100", "", "", "2025-06-24", "MECE ORAS"], ["2025-02-26", "44762", "M2", "10118992", "3", "", "2025-02-27", "2025-04-27", "FALLA MODULO ENTRAD ANALOG FLEX/IO-XT", "101051782", "CCSA-06110", "TURBINA MARS 100 SOLONOX 1778M", "10054909", "2025-04-10", "MECE ORAS"], ["2025-03-14", "45165", "M2", "10119190", "4", "", "2025-03-19", "2025-06-16", "Rotura diafragma PILOTO 220 de PRV-2145", "101057145", "CCSA-02000", "", "", "2025-05-07", "MECE ORAS"], ["2025-04-04", "45165", "M1", "10125049", "", "", "2025-04-04", "", "ALTO FLUJO VENTEO SELLO SEG. TC-6001", "101164822", "CCSA-06120", "COMPRESOR CENTRIFUGO", "10054910", "2026-09-24", "MECE ORAS"], ["2025-04-04", "45165", "M2", "10123744", "2", "", "2025-04-04", "", "ALTO FLUJO SELLO SECUNDARIO SUCCIÓN", "", "CCSA", "", "", "", "MECE PTBO"], ["2025-04-04", "45165", "M2", "10128535", "1", "", "2025-04-04", "", "ALTO FLUJO VENTEO SELLO SEG.(2) TC-6001", "101210173", "CCSA-06120", "COMPRESOR CENTRIFUGO", "10054910", "", "METR ORAS"], ["2025-04-21", "", "M1", "10119490", "4", "", "2025-04-21", "2025-05-30", "Alto DP de Filtros de Cabina TC-6001", "101066049", "CCSA-06130", "PATIN", "10054911", "2025-05-30", "MECE ORAS"], ["2025-04-30", "44762", "M2", "10120240", "2", "", "2025-04-30", "2025-06-09", "FALLA RTD-4011 GAS CONSUMO PM-1008", "101080623", "CCSA-2000-ME-PM1008-RTD-4011", "", "", "2025-06-09", "MECE ORAS"], ["2025-05-01", "44762", "C2", "10123629", "4", "", "2025-05-01", "2026-05-01", "OSCILACIONES EN UM-3022 - SIEMENS", "", "TERC-NKTS-DE-PM1009-UM-3022", "", "", "", "MECE PTBO"], ["2025-05-01", "44762", "M2", "10123632", "4", "", "2025-05-01", "2026-06-01", "OSCILACIONES EN UM-3022 - SIEMENS", "101139090", "TERC-NKTS-DE-PM1009-UM-3022", "", "", "2026-03-16", "MECE ORAS"], ["2025-05-01", "44762", "M2", "10123633", "4", "", "2025-04-30", "2026-06-01", "OSCILACIONES EN UM-3021 - SIEMENS", "101139091", "TERC-NKTS-DE-PM1010-UM-3021", "", "", "", "METR ORAS"], ["2025-05-14", "", "M1", "10119744", "", "", "2025-03-02", "2025-08-01", "Paro TC6001  Falla Sist Ctrl de Planta", "101080903", "CCSA", "", "", "2026-04-08", "MECE ORAS"], ["2025-06-02", "44762", "M2", "10120905", "3", "", "2025-06-02", "2025-07-30", "SWITCH'S PCV 5401 DAÑADO", "101098454", "CCSA", "", "", "2025-07-17", "MECE ORAS"], ["2025-06-17", "45165", "M2", "10120307", "4", "1", "2025-06-18", "2025-09-15", "Falla SENSOR TEMP. AGUA MG-3002 PCS", "101082141", "CCSA-03200", "", "", "2025-07-15", "MECE ORAS"], ["2025-06-23", "45720", "M2", "10120372", "1", "", "2025-06-06", "2025-07-15", "Falla de sensor MG 3002", "101084148", "OCTY-03200", "MOTOR", "10053942", "2025-08-05", "MECE ORAS"], ["2025-07-01", "45468", "M2", "10120529", "", "", "2025-07-01", "", "Falla Equipo TEG2118A- Termopila", "101086133", "TERC-NKTS-BC-PA", "", "", "", "EMDA METR ORAS"], ["2025-07-04", "44712", "M2", "10120613", "2", "", "2025-07-04", "", "Falla en comunicacion de FF-5202B", "101087679", "OCTY-5202B", "", "", "2025-08-01", "MECE ORAS"], ["2025-07-10", "45762", "M2", "10120697", "2", "", "2025-07-31", "", "RTD DE TI-5110 LECTURA ANOMALA", "101089506", "OCTY-05000", "", "", "2025-10-09", "MECE ORAS"], ["2025-07-11", "", "M2", "10120719", "2", "", "2025-07-31", "2025-08-15", "Falla sistema de extincion de venteo", "101089520", "OCTY-07000", "CHIMENEA SISTEMA COMPRESOR", "10053948", "2025-08-01", "MECE ORAS"], ["2025-07-15", "", "M2", "10120843", "2", "", "2025-08-15", "", "Manometro roto de  valvula de reciclo", "101090517", "OCTY-05100", "", "", "2025-10-03", "MECE ORAS"], ["2025-07-15", "45762", "M2", "10120840", "2", "", "2025-08-15", "", "67FR de aire instr sin manometro", "101090516", "OCTY-05110", "SEPARADOR DE ENTRADA", "10053913", "2025-10-03", "MECE ORAS"], ["2025-07-18", "45165", "M2", "10120904", "3", "", "2025-07-18", "2025-07-22", "PERDIDA AGUA RADIADOR  MG #3002", "101092566", "CCSA-03000", "", "", "2025-07-22", "MECE ORAS"], ["2025-07-22", "", "M2", "10120946", "", "", "2025-07-22", "", "", "", "CCSA-03200", "", "", "", "MECE PTBO"], ["2025-07-23", "", "M2", "10120961", "2", "", "2025-07-23", "2025-08-01", "LCV de FS-5102 con fuga", "101092600", "OCTY-05120", "SEPARADOR DE ENTRADA", "10053914", "2025-08-01", "MECE ORAS"], ["2025-07-24", "45720", "M1", "10121002", "3", "", "2025-07-25", "2025-09-22", "Perdida de aceite actuador descarga TC", "101094205", "OCTY-06000", "", "", "2025-07-25", "MECE MERE ORAS"], ["2025-07-28", "45762", "M2", "10121051", "3", "", "2025-07-24", "2026-02-19", "Falla regulacion skid Gas comb TC", "101096337", "OCTY-02101", "", "", "2025-11-14", "MECE ORAS"], ["2025-07-30", "45720", "M0", "10121175", "1", "", "2025-07-30", "2025-12-31", "Serv. Bulletin 3.5-109(Ver texto amplia)", "", "OCTY-06100", "", "", "2025-10-23", "MECE"], ["2025-07-30", "45385", "M0", "10121190", "1", "", "2025-07-30", "2025-12-31", "Serv. Bulletin 3.5-109(Ver texto amplia)", "", "CCSA-06000", "", "", "", "MEAB"], ["2025-08-01", "45165", "M1", "10121603", "3", "1", "2025-08-19", "2025-10-17", "MTTO. FILTRO SEPARADOR FS-1011 PM1004", "101102210", "TERC-NKTS-DE-PM1004-FS-1011", "Filtro Separador FS-1011", "10052713", "2025-09-28", "MECE ORAS"], ["2025-08-03", "", "M2", "10121232", "3", "1", "2025-08-04", "2025-10-30", "Correa bomba de agua intercooler MG#3002", "101098453", "CCSA-03200", "", "", "2025-08-20", "MECE ORAS"], ["2025-08-06", "44762", "M2", "10121337", "3", "", "2025-08-05", "2025-08-10", "FALLA DE COMUNICACION DE MODULOS STN-PLC", "101101162", "CCSA-08000", "", "", "2025-08-06", "MECE ORAS"], ["2025-08-11", "45720", "M2", "10121419", "1", "", "2025-08-11", "", "Detonaciones en Mg 3001", "101100306", "OCTY-03100", "MOTOR", "10053940", "2025-08-14", "MECE ORAS"], ["2025-08-13", "45385", "M0", "10121514", "1", "", "2025-08-13", "2025-12-31", "Serv. Bulletin 3.5-109(Ver texto amplia)", "", "CCSA-06110", "", "", "", "MECE PTBO"], ["2025-08-13", "44712", "M0", "10121507", "1", "", "2025-08-13", "2025-12-31", "Serv. Bulletin 3.5-109(Ver texto amplia)", "", "OCTY-06110", "", "", "", "MECE PTBO"], ["2025-08-13", "45720", "M2", "10121486", "1", "", "2025-08-06", "2025-08-06", "Succión de bomba de TK -7701 obturada", "101100900", "OCTY-07000", "", "", "2025-08-06", "MECE ORAS"], ["2025-08-15", "45720", "M2", "10121579", "2", "", "2025-08-15", "", "Valvula reguladora aire inst. con fuga", "101101418", "OCTY-04100", "PULMON DE INSTRUMENTOS 4001", "10053952", "2025-08-16", "MECE ORAS"], ["2025-08-18", "45165", "M1", "10121606", "3", "1", "2025-08-19", "2025-10-17", "MTTO. FILTRO SEPARADOR FS-1021 PM1004", "101102211", "TERC-NKTS-DE-PM1004-FS-1021", "Filtro Separador FS-1021", "10052714", "2025-08-26", "MECE ORAS"], ["2025-08-19", "", "M2", "10121639", "2", "", "2025-08-19", "2025-08-26", "Averia enfriador de shelters 1001", "101102543", "TERC-NKTS-AB-ME-PM1001-7000", "", "", "", "METR ORAS"], ["2025-08-19", "", "M2", "10121663", "2", "", "2025-08-19", "2025-08-26", "Averia enfriador de shelters 1002", "101102546", "TERC-NKTS-AB-ME-PM1002-7000", "", "", "", "METR ORAS"], ["2025-08-20", "45949", "M2", "10121701", "2", "", "2025-08-20", "2025-08-28", "Sensor de puerta de cabina abierta (TC)", "101102847", "OCTY-06100", "", "", "2025-08-29", "MECE ORAS"], ["2025-08-21", "46070", "M2", "10121744", "", "", "2025-08-21", "2025-08-28", "Valvula purga 1/2\"c/ fuga. FS EMED 1001", "101103124", "OCTY", "", "", "2025-08-29", "MECE ORAS"], ["2025-08-21", "45720", "M2", "10121743", "2", "", "2025-08-21", "", "Perdida de refrigerante en MG 3002", "101103123", "OCTY-03200", "MOTOR", "10053942", "2025-08-25", "MECE ORAS"], ["2025-09-02", "45720", "M2", "10121918", "2", "", "2025-08-23", "", "Dispercion T5 en TC1 PC Tratayen.", "101106732", "OCTY-06110", "", "", "2025-08-24", "MECE ORAS"], ["2025-09-02", "", "M2", "10121912", "3", "", "2025-09-03", "2025-11-01", "ZUMBIDO ANORMAL CORREAS MG-1", "101106731", "OCTY-03100", "MOTOR", "10053940", "2025-09-08", "MECE ORAS"], ["2025-09-05", "45720", "M2", "10121976", "3", "", "2025-09-06", "2025-11-04", "FUGA VALV. VISOR FS-5102", "101107535", "OCTY-05120", "", "", "2025-10-13", "MECE ORAS"], ["2025-09-05", "", "M2", "10121969", "2", "", "2025-09-05", "2025-09-11", "Falla de Regulador de aire Bomba Drenaje", "101107523", "OCTY-TAN", "BOMBA NEUMÁTICA DRENAJES PEM BN-7703", "10056052", "2025-09-06", "MECE ORAS"], ["2025-09-12", "44762", "M2", "10122430", "3", "", "2025-10-01", "2025-10-20", "FALLA SENSOR BAM2 Y MODULO AF0450", "101122262", "CCSA-06000", "", "", "2025-10-06", "MECE ORAS"], ["2025-09-12", "44762", "M2", "10122134", "3", "", "2025-09-15", "2025-09-17", "AVERIA FIN DE CARRERA VALVULA XNV 6216", "101111393", "CCSA-06100", "", "", "2025-09-15", "MECE ORAS"], ["2025-09-13", "45148", "M2", "10122118", "3", "", "2025-09-18", "2025-11-28", "Manometro2 desc.TC-WEISZ error lectura", "101109677", "OCTY-06130", "PATIN", "10053984", "2025-10-24", "MECE ORAS"], ["2025-09-13", "45148", "M2", "10122117", "3", "", "2025-09-13", "2025-10-20", "Manometro desc.TC-WEISZ error lectura", "101109676", "OCTY-06130", "PATIN", "10053984", "2025-10-24", "MECE ORAS"], ["2025-09-15", "45165", "M1", "10122149", "4", "1", "2025-09-08", "2025-09-12", "MTTO MG-3001 (700hs)", "101110159", "CCSA-03100", "MOTOR", "10055516", "2025-09-15", "MECE ORAS"], ["2025-09-15", "45165", "M1", "10122156", "", "1", "2025-09-15", "2025-10-31", "MTTO MG-3002 (C3/4200hs)", "101110162", "CCSA-03200", "MOTOR", "10055519", "2025-10-31", "MECE ORAS"], ["2025-09-15", "", "M2", "10122393", "2", "1", "2025-09-15", "", "Fuga gas separaror entrada SF-5101", "101114518", "OCTY-05120", "", "", "2025-09-30", "MECE ORAS"], ["2025-09-19", "45165", "M2", "10122251", "2", "1", "2025-09-15", "2025-10-01", "MTTO VÁLVULA DE REFUERZO (BOOSTER)", "101111392", "CCSA-06120", "COMPRESOR CENTRIFUGO", "10054910", "2025-09-19", "MECE ORAS"], ["2025-09-19", "45165", "M2", "10126074", "", "", "2025-09-19", "", "FALLA DE BOOSTER-Bomba-Motor Neum_TC6001", "101178639", "CCSA-06130", "", "", "", "METR ORAS"], ["2025-09-19", "45165", "M2", "10128536", "1", "", "2025-09-19", "", "FALLA DE BOOSTER-Bomba-Motor Neum_TC6001", "101210224", "CCSA-06130", "", "", "", "METR ORAS"], ["2025-09-23", "45165", "M2", "10122309", "", "1", "2025-09-23", "", "FAN DE RADIADOR (EXCESO DE RUIDO) MG3001", "101112515", "CCSA-03100", "MOTOR", "10055516", "2025-09-24", "MECE ORAS"], ["2025-09-28", "", "M2", "10122370", "2", "", "2025-09-28", "2025-09-28", "Lente sucio en detector de llama Tc-6001", "101113962", "OCTY-06110", "TURBINA MARS 100 SOLONOX 1777M", "10053950", "2025-09-28", "MECE ORAS"], ["2025-10-01", "44762", "M2", "10122429", "3", "", "2025-10-01", "2025-10-10", "FALLA SISTEMA FIRE AND GAS", "101122264", "CCSA-08000", "", "", "2025-10-06", "MECE ORAS"], ["2025-10-08", "44762", "M2", "10122534", "3", "", "2025-10-07", "2025-10-08", "AVERIA TUBING SEÑAL DPIT55001", "101122265", "CCSA", "", "", "2025-10-08", "MECE ORAS"], ["2025-10-10", "", "M2", "10122560", "2", "", "2025-10-10", "2025-10-10", "Fuga en union bridada de psv-2146 GC.", "101117346", "OCTY-02103", "PSV 2146", "10054938", "2025-10-10", "MECE ORAS"], ["2025-10-11", "44762", "C2", "10123065", "2", "", "2025-11-16", "2025-12-15", "PM1003 - Falla de nergia Externa", "101128019", "TERC-NKTS-DE-ME-PM1003-4000", "", "", "2025-10-11", "MECE ORAS"], ["2025-10-14", "45720", "M2", "10122632", "2", "", "2025-10-14", "2025-10-21", "Cargador de bateria MG en falla", "", "OCTY-00100", "MOTOR AUXILIAR", "10053943", "2025-11-11", "MECE"], ["2025-10-14", "45720", "M2", "10122633", "2", "", "2025-10-15", "2025-11-13", "Cargador de bateria MG en falla", "101118582", "OCTY-00100", "MOTOR AUXILIAR", "10053943", "2025-11-11", "MECE ORAS"], ["2025-10-15", "", "M2", "10122644", "2", "", "2025-10-15", "2025-10-20", "Fuga por union bridad GC mg2", "101118848", "OCTY-02103", "", "", "2025-10-20", "MECE ORAS"], ["2025-10-22", "44762", "M2", "10123906", "3", "", "2025-10-22", "2026-04-14", "FALLA CARGA FICTICIA SENSOR PUERTA ABIER", "101154918", "CCSA", "", "", "2026-04-14", "MECE ORAS"], ["2025-10-30", "45720", "M2", "10122820", "2", "", "2025-10-30", "", "Averia de pulsador PJ1 en AREA 2000", "101123211", "OCTY-INS", "", "", "2026-01-02", "MECE ORAS"], ["2025-11-03", "45165", "M1", "10122869", "4", "", "2025-11-03", "2025-11-28", "MTTO MG-3001 (700hs)", "101124678", "CCSA-03100", "MOTOR", "10055516", "2025-11-10", "MECE ORAS"], ["2025-11-13", "45165", "M1", "10123032", "4", "", "2025-11-13", "2025-11-21", "MTTO MG-3002 (700hs)", "101127443", "CCSA-03200", "MOTOR", "10055519", "2025-11-21", "MECE ORAS"], ["2025-11-14", "46070", "M2", "10123053", "2", "", "2025-11-14", "2025-11-14", "toma de presion sin valvula de bloqueo", "101127714", "OCTY-02101", "", "", "2025-12-12", "MECE ORAS"], ["2025-11-17", "45165", "M2", "10123120", "3", "", "2025-11-17", "", "FUGA SK-FE-4011", "101129176", "TERC-NKTS-DE-ME-PM1004-5000", "", "", "2025-11-20", "MECE ORAS"], ["2025-11-18", "45720", "M2", "10123100", "4", "", "2025-11-19", "2026-02-16", "perdida de aceite manguera filtro MG3001", "101128891", "OCTY-03100", "MOTOR", "10053940", "2026-03-01", "MECE ORAS"], ["2025-11-25", "45165", "M1", "10123175", "4", "", "2025-11-25", "2026-04-30", "MTTO MG-3001 (C3/4200hs)", "101130832", "CCSA-03100", "MOTOR", "10055516", "2026-02-27", "MECE ORAS"], ["2025-11-27", "45385", "M0", "10123208", "1", "", "2025-11-27", "2026-01-31", "Serv. Bulletin 6.8/102(Ver texto amplia)", "101178926", "CCSA-06110", "", "", "", "METR ORAS"], ["2025-11-27", "44712", "M0", "10123217", "1", "", "2025-11-27", "2026-01-31", "Serv. Bulletin 6.8/102(Ver texto amplia)", "", "OCTY-06110", "", "", "", "MEAB"], ["2025-11-27", "45165", "M1", "10123199", "3", "", "2025-11-27", "2026-01-31", "MTTO FILTROS DE CABINA TC-6001", "101131388", "CCSA-06130", "PATIN", "10054911", "2026-01-07", "MECE ORAS"], ["2025-11-27", "44762", "M2", "10123905", "3", "", "2025-11-27", "2026-04-17", "FALLA CCM AEROENFRIADOR FF-5202A 522B", "101172524", "CCSA", "", "", "2026-04-17", "MECE ORAS"], ["2025-11-28", "45385", "M0", "10123250", "1", "", "2025-11-28", "2026-03-31", "Serv. Bulletin 6.5/131(Ver texto amplia)", "", "CCSA-06100", "", "", "", "METR"], ["2025-11-28", "45720", "M0", "10123281", "1", "", "2025-11-28", "2026-03-31", "Serv. Bulletin 6.5/131(Ver texto amplia)", "", "OCTY-06100", "", "", "", "MEAB"], ["2025-11-29", "45720", "M5", "10123303", "4", "", "2025-11-29", "", "colocacion de valvulas en purgas de LT", "", "OCTY-05100", "", "", "", "MECE"], ["2025-12-02", "44762", "M2", "10123361", "3", "", "2025-12-02", "", "FALLA CARGADOR RECTIFICADOR PM 1004", "101136654", "TERC-NKTS-DE-ME-PM1004-6000", "", "", "2025-12-21", "MECE ORAS"], ["2025-12-02", "46070", "M2", "10123366", "2", "", "2025-12-02", "2026-01-30", "Purga de LG sin sistema cerrado", "101133073", "OCTY-05110", "SEPARADOR DE ENTRADA", "10053913", "2026-01-01", "MECE ORAS"], ["2025-12-03", "46070", "M2", "10123384", "2", "", "2025-12-03", "", "PI de EMED 1001 con lectura errónea", "101133325", "OCTY", "", "", "2025-12-04", "MECE ORAS"], ["2025-12-05", "45165", "M1", "10123414", "", "", "2025-12-09", "2025-12-12", "MTTO MG-3002 (700hs)", "101133850", "CCSA-03200", "MOTOR", "10055519", "2025-12-12", "MECE ORAS"], ["2025-12-18", "45720", "M2", "10123580", "2", "", "2025-12-13", "", "Aeroenfriador FF-5202A con rotura de asp", "101137592", "OCTY-5202A", "", "", "", "MECE ORAS"], ["2025-12-25", "45720", "M2", "10123647", "2", "", "2025-12-25", "2025-12-30", "Falsa Alarma de bajo nivel refirgerante", "101139591", "OCTY-03100", "MOTOR", "10053940", "2025-12-26", "MECE ORAS"], ["2025-12-26", "45385", "M0", "10123953", "1", "", "2026-01-01", "2026-01-04", "Serv.Bulletin 7.4/120A(Ver texto amplia)", "101178925", "CCSA-06100", "", "", "2026-05-12", "MECE ORAS"], ["2025-12-26", "45720", "M0", "10123985", "1", "", "2026-01-01", "2026-01-04", "Serv.Bulletin 7.4/120A(Ver texto amplia)", "", "OCTY-06100", "", "", "", "MEAB"], ["2025-12-26", "", "M5", "10123673", "3", "", "2025-12-27", "2026-02-24", "MUESTREO PUNTUAL DE CROMATOGRAFIA", "", "OCTY", "", "", "", "MECE MERE"], ["2025-12-26", "", "M5", "10123672", "3", "", "2025-12-27", "2026-02-24", "ASISTENCIA Y ASESORAMIENTO TECNICO SOLAR", "", "OCTY", "", "", "", "MECE MERE"], ["2025-12-26", "", "M5", "10123670", "3", "", "2025-12-27", "2026-02-24", "PURGADO AUTOMATICO", "", "OCTY", "", "", "", "MECE MERE"], ["2025-12-26", "", "M5", "10123669", "3", "", "2025-12-27", "2026-02-24", "OPTIMIZAR TRAZADO TERMICO GAS COMBUST...", "", "OCTY", "", "", "", "MECE MERE"], ["2026-01-01", "45762", "C1", "10123889", "", "", "2026-01-01", "", "ADQUISICION GAS PATRON PM1001", "101143736", "TERC-NKTS-AB-PM1001-CG-4001", "", "", "", "METR ORAS"], ["2026-01-01", "45762", "C1", "10123890", "", "", "2026-01-01", "", "ADQUISICION GAS PATRON PM1002", "101143737", "TERC-NKTS-AB-PM1002-GC-4101", "", "", "", "METR ORAS"], ["2026-01-01", "44762", "C1", "10123886", "", "", "2026-01-01", "", "ADQUISICION GAS PATRON PM1003", "101143732", "TERC-NKTS-DE-PM1003-AIT-4041", "", "", "", "METR ORAS"], ["2026-01-01", "44762", "C1", "10123888", "", "", "2026-01-01", "", "ADQUISICION GAS PATRON PM1004", "101143734", "TERC-NKTS-DE-PM1004-AIT-4011", "", "", "", "METR ORAS"], ["2026-01-05", "45165", "M1", "10123793", "4", "", "2026-01-05", "2026-01-09", "MTTO 700hs MG-3002 (6300hs)", "101142646", "CCSA-03200", "MOTOR", "10055519", "2026-01-09", "MECE ORAS"], ["2026-01-08", "45762", "C2", "10123863", "", "", "2026-01-08", "", "TI2018 en falla", "101143469", "OCTY-02101", "", "", "", "MECE ORAS"], ["2026-01-08", "45762", "C2", "10123872", "", "", "2026-01-08", "", "Falla termistor 1 modulo 2", "101143470", "OCTY-06130", "", "", "", "MECE ORAS"], ["2026-01-10", "44762", "M2", "10123907", "3", "", "2026-01-10", "2026-04-07", "FALLA FIN DE CARRERA PCV-5401", "101172525", "CCSA", "", "", "2026-04-07", "MECE ORAS"], ["2026-01-10", "45165", "M2", "10124242", "", "", "2026-01-30", "", "FALLA TRANSMISOR DPIT-55001", "101149863", "CCSA", "", "", "2026-02-02", "MECE ORAS"], ["2026-01-21", "45762", "M2", "10124111", "1", "", "2026-01-22", "2026-01-30", "Rotura de valvula de seguridad de CGN", "101147318", "OCTY", "", "", "2026-04-10", "MECE ORAS"], ["2026-01-22", "44762", "M2", "10124122", "", "", "2026-01-22", "", "FALLA MODULO RTD", "", "CCSA", "", "", "2026-01-22", "MECE"], ["2026-02-20", "45468", "M2", "10124504", "2", "", "2026-02-24", "", "RECOMPOSICION DE TAPADA PK427", "", "TERC-NKTS-CD-CA", "", "", "2026-02-27", "EMDA METR"], ["2026-02-27", "45956", "M2", "10124596", "4", "1", "2026-02-27", "", "Terminales cortados CPM anodo dispersor.", "101157223", "TERC-NKTS-DE-PA", "", "", "2026-04-16", "MECE ORAS"], ["2026-02-28", "", "M2", "10124610", "2", "", "2026-03-01", "2026-03-30", "RTD TIT 5001", "", "OCTY-05000", "", "", "2026-08-01", "MECE"], ["2026-03-01", "45720", "M2", "10124617", "2", "", "2026-02-22", "2026-02-24", "Manguera de circuito de agua ref averiad", "101157763", "OCTY-03100", "MOTOR", "10053940", "2026-02-24", "MECE ORAS"], ["2026-03-18", "45720", "M2", "10124946", "2", "", "2026-03-18", "", "Puente grua con falla", "101162578", "OCTY-IZA", "", "", "", "MECE ORAS"], ["2026-03-24", "45720", "M2", "10125018", "2", "", "2026-03-24", "2026-05-29", "Rotura de aspas de FF-5203B", "101164564", "OCTY-5203B", "Fin Fan 5203 B (MAZO)", "10055780", "", "MECE ORAS"], ["2026-04-10", "45720", "M2", "10125310", "2", "1", "2026-04-10", "", "PSV 6207 - ACTUACION FUERA DE SET", "101169505", "OCTY-06100", "PSV 6207", "10054924", "2026-04-10", "MECE ORAS"], ["2026-04-11", "45720", "M2", "10125348", "0", "", "2026-04-11", "2026-04-13", "T5 Dispersion Termica - TTCC6110", "101169818", "OCTY-06110", "TURBINA MARS 100 SOLONOX 1777M", "10053950", "2026-04-13", "MECE ORAS"], ["2026-04-16", "45956", "M1", "10125484", "2", "", "2026-04-17", "2026-05-16", "CALIBRACION PSV PANEL DE CONTROL BIFFI", "101171321", "TERC-NKTS-DE-VALVUL-XNV315", "PSV PANEL DE CONTROL BIFI", "10052946", "2026-04-10", "MECE ORAS"], ["2026-04-22", "45468", "M0", "10125739", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSL10001", "TRAMPA LANZADORA TSL-10001", "10052667", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125740", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "TRAMPA RECEPTORA TSR-20001", "10052668", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125741", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSL20001", "TRAMPA LANZADORA TSL-20001", "10052669", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125742", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "TRAMPA RECEPTORA TSR-30001", "10052670", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125743", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSL30001", "TRAMPA LANZADORA TSL-30001", "10052671", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125744", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "TRAMPA RECEPTORA TSR-40001", "10052672", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125745", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSL40001", "TRAMPA LANZADORA TSL-40001", "10052673", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125746", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "TRAMPA RECEPTORA TSR-50001", "10052674", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125747", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "Filtro Separador FS-20001", "10052675", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125748", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "TANQUE DE CHOQUE", "10052676", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125749", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "TANQUE COLECTOR DE LIQUIDOS", "10052677", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125750", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "Filtro Separador FS-30001", "10052678", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125751", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "TANQUE DE CHOQUE", "10052679", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125752", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "TANQUE COLECTOR DE LIQUIDOS", "10052680", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125753", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "Filtro Separador FS-40001", "10052681", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125754", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "TANQUE DE CHOQUE", "10052682", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125755", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "TANQUE COLECTOR DE LIQUIDOS", "10052683", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125756", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "Filtro Separador FS-50001", "10052684", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125757", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "TANQUE DE CHOQUE", "10052685", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125758", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "TANQUE COLECTOR DE LIQUIDOS TK-50002", "10052686", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125759", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "VALVULA DE BLOQUEO HNV 21302", "10053485", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125760", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "VALVULA DE BLOQUEO HNV 21301", "10053486", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125761", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "DPI FS", "10053487", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125762", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSR20001", "PI TSR", "10053488", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125763", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "VALVULA DE BLOQUEO XNV 31302", "10053489", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125764", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "VALVULA DE BLOQUEO XNV 31301", "10053490", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125765", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "DPI FS", "10053491", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125766", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSR30001", "PI TSR", "10053492", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125767", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "VALVULA DE BLOQUEO HNV 41302", "10053493", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125768", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "VALVULA DE BLOQUEO HNV 41301", "10053494", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125769", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "DPI FS", "10053495", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125770", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSR40001", "PI TSR", "10053496", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125771", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "VALVULA DE BLOQUEO HNV 51302", "10053497", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125772", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "VALVULA DE BLOQUEO HNV 51301", "10053498", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125773", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "DPI FS", "10053499", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125774", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSR50001", "PI TSR", "10053500", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125775", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSL10001", "VALVULA DE BLOQUEO HNV 12302", "10053501", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125776", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSL10001", "VALVULA DE BLOQUEO HNV 12301", "10053502", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125777", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-AB-TRAMPA-TSL10001", "PI TSL", "10053503", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125778", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSL20001", "VALVULA DE BLOQUEO HNV 22302", "10053504", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125779", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSL20001", "VALVULA DE BLOQUEO HNV 22301", "10053505", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125780", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-BC-TRAMPA-TSL20001", "PI TSL", "10053506", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125781", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSL30001", "VALVULA DE BLOQUEO HNV 32302", "10053507", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125782", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSL30001", "VALVULA DE BLOQUEO HNV 32301", "10053508", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125783", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-CD-TRAMPA-TSL30001", "PI TSL", "10053509", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125784", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSL40001", "VALVULA DE BLOQUEO HNV 42302", "10053510", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125785", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSL40001", "VALVULA DE BLOQUEO HNV 42301", "10053511", "", "MEAB"], ["2026-04-22", "45468", "M0", "10125786", "1", "", "2026-04-22", "2026-09-01", "Relev. técnico trampas - Inc.100004188", "", "TERC-NKTS-DE-TRAMPA-TSL40001", "PI TSL", "10053512", "", "MEAB"], ["2026-05-04", "45720", "M2", "10125974", "1", "", "2026-05-04", "", "MG1con bajo niv refrig sin baliza activa", "101176760", "OCTY-03100", "MOTOR", "10053940", "2026-05-06", "MECE ORAS"], ["2026-05-06", "44712", "M2", "10126007", "3", "2", "2026-05-06", "2026-11-06", "Falla Display Transmisor presion y temp.", "101177296", "OCTY-05000", "", "", "", "MECE ORAS"], ["2026-05-09", "45720", "G2", "10126048", "", "", "2026-05-09", "", "REGULADORA DE ALTA GAS COMB TC", "", "OCTY-02101", "", "", "2026-08-25", "MECE"], ["2026-05-11", "45468", "G4", "10126076", "", "", "2026-05-22", "2027-06-22", "191165_GPM-TRA3_PK432+212", "", "TERC-NKTS-CD", "", "", "", "METR"], ["2026-05-18", "46057", "G2", "10126183", "", "", "2026-05-18", "", "Falla modulo paro teg A", "101180928", "TERC-NKTS-CD-VALVUL-XNV312", "TEG-2113A", "10052895", "2026-07-18", "EMDA METR ORAS"], ["2026-05-26", "46057", "G2", "10126325", "", "3", "2026-05-26", "", "Falla modulo paro teg B", "101183655", "TERC-NKTS-CD-VALVUL-XNV312", "TEG-2113B", "10052896", "2026-07-18", "EMDA METR ORAS"], ["2026-05-29", "45468", "G4", "10126413", "", "", "2026-04-21", "2026-05-22", "191595_GPM-TRA1_PK106-108_ILEGAL", "", "TERC-NKTS-AB", "", "", "", "METR"], ["2026-06-02", "", "M2", "10126457", "3", "", "2026-06-03", "2026-08-01", "ELEMENTO DESCONOCIDO EN INTERIOR PM 1003", "101184797", "TERC-NKTS-DE-PM1003-FX-4041", "", "", "", "METR ORAS"], ["2026-06-09", "45762", "M2", "10126551", "2", "", "2026-06-09", "", "RTD sin lectura de temperatura TIT-5001", "101185883", "OCTY-05100", "", "", "2026-08-25", "MECE ORAS"], ["2026-06-11", "45163", "M2", "10126590", "2", "1", "2026-06-11", "", "CQ 2001 - Pantalla tactil sin respuesta.", "101186560", "OCTY-02800", "CALENTADOR DE GAS COMBUSTIBLE", "10053951", "2026-07-03", "MECE ORAS"], ["2026-06-12", "45956", "M1", "10126655", "4", "", "2026-06-16", "2026-06-16", "Cable bat. ánodos cortado", "101187127", "CCSA-04300", "", "", "2026-06-16", "MECE ORAS"], ["2026-06-14", "", "M2", "10126627", "1", "", "2026-06-14", "", "Falla alternador MG-3001 con paro de equ", "101188153", "OCTY-03100", "MOTOR", "10053940", "", "MECE ORAS"], ["2026-06-15", "45165", "M2", "10126981", "", "", "2026-06-15", "", "FALLA PCR-2114 GAS COMBUSTIBLE SK-2101", "101191172", "CCSA-02000-ME-PM1008-3000", "", "", "", "MECE ORAS"], ["2026-07-03", "45163", "M2", "10126971", "", "1", "2026-07-03", "2026-08-31", "CQ 2001 - Falla de HMI Tablero de campo.", "101191158", "OCTY-02800", "", "", "2026-07-13", "MECE ORAS"], ["2026-07-08", "45956", "G2", "10127303", "", "", "2026-07-24", "", "CELDA DE BATERIA DAÑADA BANCO BAT B", "101194530", "TERC-NKTS-DE-VALVUL-XNV42001", "BANCO BATERIAS 42001B", "10053210", "", "METR ORAS"], ["2026-07-12", "45468", "G4", "10127075", "", "", "2026-07-15", "2026-09-30", "190030_BMNK_GPM-TRA1_PK015+680", "", "TERC-NKTS-AB-CA", "", "", "", "METR"], ["2026-07-12", "45468", "G4", "10127074", "", "", "2026-05-22", "2027-06-22", "191572_GPM-TRA1_PK032+610", "", "TERC-NKTS-AB-CA", "", "", "", "MEAB"], ["2026-07-13", "45243", "M2", "10127090", "3", "", "2026-07-13", "2026-08-31", "XNV22001 - Falla proteccion catodica", "101192467", "TERC-NKTS-AB-PA", "", "", "", "MECE ORAS"], ["2026-07-17", "", "M2", "10127208", "4", "1", "2026-07-17", "2026-07-31", "FALLA EN TORRES DE ILUMINACION T06 Y T07", "101194024", "CCSA-03000", "", "", "2026-07-20", "MECE ORAS"], ["2026-07-20", "45468", "G4", "10127201", "", "", "2026-07-20", "2026-07-24", "ID 187937-GPM-PK 4+700", "", "TERC-NKTS", "", "", "", "MEAB"], ["2026-07-20", "", "M2", "10127209", "4", "", "2026-11-01", "2026-12-31", "FALLA EN COLUMNA DE ILUMINACION - CIN-30", "101194025", "CCSA-03000", "", "", "", "METR ORAS"], ["2026-07-24", "44762", "M2", "10127304", "4", "", "2026-07-25", "2026-10-22", "HS-9981 DAÑADO - INGRESA AGUA EN JB", "101194529", "CCSA-09000", "", "", "2026-08-19", "MECE ORAS"], ["2026-07-28", "45148", "M2", "10127346", "", "", "2026-07-28", "", "Picaporte  pta de emergencia rota usina", "101195067", "OCTY-03000", "", "", "2026-08-01", "MECE ORAS"], ["2026-07-29", "45720", "C2", "10127392", "1", "1", "2026-07-29", "", "Fugas sello tapa FS-1011 EMED", "", "OCTY", "", "", "", "MEAB"], ["2026-08-03", "45468", "G4", "10127467", "", "", "2026-08-04", "2026-08-21", "192381_GPM_TRAMO-3_PK0311+180", "", "TERC-NKTS-CD-CA", "", "", "", "METR"], ["2026-08-03", "45165", "M1", "10127532", "", "", "2026-08-03", "", "ENGRASE VP-6051", "", "CCSA-07000", "", "", "", "MEAB"], ["2026-08-04", "45165", "M2", "10127501", "", "", "2026-08-04", "2026-08-06", "CAMBIO DE BATERIAS MG-3001", "101196212", "CCSA-03100", "MOTOR", "10055516", "2026-08-06", "MECE ORAS"], ["2026-08-07", "45720", "M2", "10127562", "2", "2", "2026-08-07", "2026-12-15", "TC1 - Recomendaciones Informe de Solar", "", "OCTY-06100", "", "", "", "MEAB"], ["2026-08-18", "45762", "M2", "10127780", "2", "3", "2026-08-18", "2026-11-18", "HS-5100 - PJ1 - falla pulsador", "101198210", "OCTY-09000", "", "", "", "MECE ORAS"], ["2026-08-24", "45163", "M1", "10127873", "", "", "2026-08-24", "2026-09-02", "PCV 2114 - Regulacion de SET", "", "OCTY-02101", "", "", "2026-09-02", "MECE MERE"], ["2026-08-24", "45163", "M2", "10127872", "", "", "2026-08-24", "", "IL-301C/3 - Falla de luminaria", "101200827", "OCTY-03000", "", "", "", "METR ORAS"], ["2026-08-25", "45762", "M2", "10127893", "", "", "2026-08-25", "2026-11-30", "TIT-5001 RTD sin lectura de temperatura", "101199279", "OCTY-05000", "", "", "", "MECE ORAS"], ["2026-08-31", "45163", "M1", "10127992", "4", "", "2026-08-31", "2026-11-30", "Iluminacion viales -falla de luminaria.", "", "OCTY-03000", "", "", "2026-11-13", "MECE"], ["2026-09-03", "45468", "G4", "10128086", "", "", "2026-09-03", "2026-11-30", "ID 193966-GPM-Tramo 1-Entre PK 33 y 36", "", "TERC-NKTS-AB", "", "", "", "METR"], ["2026-09-04", "45468", "G4", "10128123", "", "", "2026-09-04", "2027-12-15", "ID 192392-GPM-Tramo 1- Entre PK 2 y 5", "", "TERC-NKTS-AB", "", "", "", "METR"], ["2026-09-16", "45163", "M1", "10128370", "2", "1", "2026-09-15", "2026-09-16", "VB1031 - VB1032 - Engrase de Valvula", "101206573", "TERC-NKTS-AB-CA", "", "", "2026-09-16", "MECE ORAS"], ["2026-09-18", "44762", "M2", "10128415", "3", "", "2026-09-18", "", "ROTUTA DE DUCTO VALVULA DE PURGA-BLEED", "101208375", "CCSA-06100", "", "", "", "METR ORAS"], ["2026-09-23", "45163", "M1", "10128522", "4", "", "2026-09-23", "2026-10-23", "LAHH-7501 falla nivel Api", "101210061", "OCTY-07000", "", "", "2026-11-13", "MECE ORAS"], ["2026-10-12", "44762", "M1", "10128917", "4", "", "2026-10-11", "2026-12-31", "FALLA EN TRANSMISOR NIVEL DE ACEITE TC", "101212888", "CCSA-06110", "TURBINA MARS 100 SOLONOX 1778M", "10054909", "", "METR ORAS"], ["2026-10-15", "44762", "M1", "10128918", "4", "", "2026-10-11", "2027-01-13", "FALLA EN CALENTADOR DE ACEITE", "101212893", "CCSA-06110", "TURBINA MARS 100 SOLONOX 1778M", "10054909", "", "METR ORAS"], ["2026-10-15", "45163", "M2", "10128909", "", "", "2026-10-15", "", "Emed 1001 - Fuga Negativo y Tierra 24V", "", "OCTY", "", "", "2026-11-30", "MEAB"], ["2026-10-15", "44762", "M2", "10128916", "", "", "2026-10-15", "", "", "", "CCSA-06110", "TURBINA MARS 100 SOLONOX 1778M", "10054909", "", "MEAB"], ["2026-10-15", "44762", "M2", "10128905", "", "", "2026-10-15", "", "FUGA EN CASETA TC6001", "", "CCSA-06130", "PATIN", "10054911", "2026-10-19", "MECE"], ["2026-10-15", "45956", "M2", "10128914", "0", "", "2026-10-14", "2026-10-14", "FUGA EN CASETA TC6001", "101212875", "CCSA-06130", "PATIN", "10054911", "2026-10-19", "MECE ORAS"], ["2026-10-15", "44762", "M2", "10128919", "3", "", "2026-10-10", "2026-10-10", "FALLA DE COMUNICACION EN JB74", "101212895", "CCSA-06130", "PATIN", "10054911", "2026-10-10", "METR ORAS"], ["2026-10-20", "45163", "M2", "10128987", "", "", "2026-10-20", "", "MG1-Falla de fuente de 24vdc", "101213749", "OCTY-03100", "", "", "2026-11-13", "MECE ORAS"]]};
+const FECHA_EMB = "16/11/2026";
+
+/* ===== CATÁLOGOS (editar acá si cambian) ===== */
+const CLASES={C1:"GCO Mantenimiento",C2:"GCO Avería",G1:"GG-Aviso de MT",G2:"GG-Aviso de Falla",G3:"GG-Aviso Reprogram.",G4:"GG-Aviso Interferencia",G5:"GG-Aviso Evaluación",G6:"GG-Aviso Reparación",G7:"Estructuras Cercanas",G8:"Aviso Fuerzas Externas",M0:"Aviso Confiabilidad",M1:"Solicitud MT",M2:"Aviso de Avería",M3:"Aviso de Actividad",M4:"NO USAR",M5:"Solicitud de Mejoras",M6:"Aviso de Inhibición",Z1:"Aviso Avería Tst"};
+const PRIOS=[
+  {k:"0",n:"Emergencia",c:"var(--p0)",r:0},{k:"1",n:"Muy alta",c:"var(--p1)",r:1},{k:"2",n:"Alta",c:"var(--p2)",r:2},
+  {k:"3",n:"Media",c:"var(--p3)",r:4},{k:"4",n:"Baja",c:"var(--p4)",r:5},
+  {k:"6",n:"Gest. aux. normativa legal 014",s:"Norm. legal",c:"var(--p6)",r:6},{k:"7",n:"Gest. aux. normativa técnica 120",s:"Norm. técnica",c:"var(--p7)",r:7},
+  {k:"8",n:"Desvío operativo",c:"var(--p8)",r:3},{k:"",n:"Sin prioridad",c:"var(--pn)",r:9}];
+const REPER={"1":"Sin repercusión – en operación","2":"Limitado – operación condicional","3":"Con repercusión – fuera de servicio"};
+const REP_C={"1":"Sin repercusión","2":"Limitado","3":"Fuera de servicio","":"Sin dato"};
+const STATUS={MEAB:"Mensaje abierto (sin tratar)",METR:"Mensaje en tratamiento",MECE:"Mensaje cerrado",ORAS:"Orden asignada",MERE:"Ejecutadas todas las medidas",EMDA:"Existen medidas abiertas",PTBO:"Petición de borrado",MEPO:"Mensaje pospuesto"};
+const ESTS=[{n:"Abierto",c:"var(--e-pen)"},{n:"Cerrado",c:"var(--e-ok)"},{n:"Anulado",c:"var(--e-nc)"}];
+const FASES=[{n:"Sin tratar (MEAB)",c:"var(--p1)"},{n:"En tratamiento (METR)",c:"var(--p3)"},{n:"Cerrado en SAP sin fecha real",c:"var(--p6)"},{n:"Otro",c:"var(--pn)"}];
+/* Sectores por ubicación técnica */
+const PLANTAS={OCTY:"PC Tratayén",CCSA:"PC Salliqueló"};
+const SIS_PLANTA={"00":"Servicios auxiliares","01":"Cañerías y válvulas de planta","02":"Gas combustible y regulación","03":"Motogeneradores (MG)","04":"Aire de instrumentos y servicios","05":"Separación y filtrado de gas","52":"Aeroenfriadores","06":"Turbocompresores (TC)","07":"Venteos, drenajes y efluentes","08":"Control, comunicaciones y F&G","09":"Paro de emergencia (ESD)","20":"Medición de gas combustible",INS:"Instrumentación",IZA:"Izaje",TAN:"Venteos, drenajes y efluentes"};
+const SIS_DUCTO={TRAMPA:"Trampas scraper",ME:"Plantas de medición (PM)",PM:"Plantas de medición (PM)",CA:"Cañería y traza",PA:"Protección anticorrosiva",VALVUL:"Válvulas de bloqueo (XNV)"};
+
+const MES_C=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const ICON_OK='<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_BAD='<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2.2v4.6M6 9.3v.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
+let D=null, ST={anio:"ALL",sec:"ALL",sis:"ALL",eq:"ALL",cla:"ALL",res:"ALL",off:new Set(),tab:"a",q:"",dqf:null};
+const HOY=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());})();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nf0=new Intl.NumberFormat("es-AR",{maximumFractionDigits:0});
+const fmt=v=>v===null||v===undefined||isNaN(v)?"—":nf0.format(v);
+const fdate=d=>d?d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+const prioDe=k=>PRIOS.find(p=>p.k===k)||PRIOS[PRIOS.length-1];
+const median=a=>{if(!a.length) return null; const s=[...a].sort((x,y)=>x-y), m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+
+/* ---------- parsing ---------- */
+function fecha(v){
+  if(v===null||v===undefined||v==="") return null; if(v instanceof Date) return v;
+  const s=String(v).trim(); let m;
+  if((m=s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return new Date(+m[1],+m[2]-1,+m[3]);
+  if((m=s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})/))) return new Date(+m[3],+m[2]-1,+m[1]);
+  if((m=s.match(/^Date\((\d+),(\d+),(\d+)/))) return new Date(+m[1],+m[2],+m[3]);
+  return null;
+}
+const nkey=s=>String(s??"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+function toObjs(rows){ if(!rows||!rows.length) return []; const h=rows[0].map(nkey); return rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]);return o;}); }
+function parseCSV(t){
+  const out=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){ if(c=='"'){ if(t[i+1]=='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c=='"') q=true; else if(c==","){row.push(f);f="";} else if(c=="\n"){row.push(f);out.push(row);row=[];f="";} else if(c!="\r") f+=c;
+  }
+  if(f||row.length){row.push(f);out.push(row);} return out;
+}
+function ubicar(u){
+  const p=u.split("-"), r={sec:"Sin ubicación",sis:"Sin ubicación",obj:""};
+  if(!u) return r;
+  if(PLANTAS[p[0]]){
+    r.sec=PLANTAS[p[0]]; const s=p[1]||"";
+    if(!s) r.sis="Planta (general)";
+    else if(/^\d/.test(s)){ const c=s.slice(0,2); r.sis=SIS_PLANTA[c]||("Sistema "+c); }
+    else r.sis=SIS_PLANTA[s]||s;
+  } else if(p[0]==="TERC"){
+    r.sec=/^[A-E]{2}$/.test(p[2]||"")?`Gasoducto tramo ${p[2]}`:"Gasoducto (general)";
+    const s=(p[3]||"").replace(/\d+$/,""); r.sis=s?(SIS_DUCTO[s]||s):"Traza (general)";
+    const m=u.match(/PM-?\d{4}|XNV\d+|TS[LR]\d+/); if(m) r.obj=m[0].replace("-","");
+  } else { r.sec=p[0]; r.sis="Sin clasificar"; }
+  return r;
+}
+function normalizar(raw){
+  const S=v=>String(v??"").trim();
+  const rows=toObjs(raw.AVISOS).map(o=>{
+    const u=S(o["ubicacion tecnica"]), loc=ubicar(u);
+    const den=S(o["denominacion objeto tecnico"]), eqn=S(o["equipo"]);
+    const st=S(o["estatus en sistema"]).toUpperCase(), tk=st.split(/\s+/).filter(Boolean);
+    const pr=(S(o["prioridad"]).match(/^\d/)||[""])[0], rp=(S(o["repercusion"]).match(/^[123]/)||[""])[0];
+    const r={av:S(o["n aviso"]),fa:fecha(o["fecha de aviso"]),resp:S(o["responsable"])||"Sin responsable",cla:S(o["clase aviso"]).toUpperCase()||"—",
+      pr,rp,fi:fecha(o["inicio deseado"]),fd:fecha(o["fin deseado"]),desc:S(o["descripcion"])||"(sin descripción)",ord:S(o["orden"]),u,
+      den,eqn,fr:fecha(o["fin averia real"]),st,tk,...loc};
+    r.eq=den?(den+(eqn?" · "+eqn:"")):(r.obj||"");
+    r.anu=tk.includes("PTBO"); r.cer=!r.anu&&!!r.fr; r.ab=!r.anu&&!r.fr;
+    r.e=r.anu?"Anulado":r.cer?"Cerrado":"Abierto";
+    r.fase=!r.ab?"":tk.includes("MECE")?"Cerrado en SAP sin fecha real":tk.includes("METR")?"En tratamiento (METR)":tk.includes("MEAB")?"Sin tratar (MEAB)":"Otro";
+    const fin=r.fr||(r.ab?HOY:null);
+    r.dias=r.anu||!r.fa||!fin?null:Math.max(0,Math.round((fin-r.fa)/864e5));
+    r.venc=r.ab&&r.fd&&r.fd<HOY;
+    r.enPlazo=r.cer&&r.fd?r.fr<=r.fd:null;
+    r.crit=!r.anu&&(r.pr==="0"||r.pr==="1"||r.rp==="3");
+    r.dq=[];
+    if(r.ab&&tk.includes("MECE")) r.dq.push("mece");
+    if(r.cer&&!tk.includes("MECE")&&(tk.includes("MEAB")||tk.includes("METR"))) r.dq.push("abSap");
+    if(!r.anu&&!r.pr) r.dq.push("sinPr");
+    if(r.fr&&r.fa&&r.fr<r.fa) r.dq.push("fecha");
+    if(r.anu) r.dq.push("ptbo");
+    r.rk=prioDe(r.pr).r; r.anio=r.fa?String(r.fa.getFullYear()):"";
+    return r;}).filter(r=>r.av||r.desc!=="(sin descripción)");
+  return {rows};
+}
+const DQ=[
+  {k:"mece",t:"Cerrados en SAP sin fecha real",d:"MECE sin Fin avería real: el tablero los cuenta abiertos. Completar la fecha real de cierre."},
+  {k:"abSap",t:"Con fecha real y abiertos en SAP",d:"Tienen Fin avería real pero siguen en MEAB o METR. Cerrar el aviso en el sistema."},
+  {k:"sinPr",t:"Sin prioridad",d:"No se pueden clasificar por criticidad. Asignar prioridad en el aviso."},
+  {k:"fecha",t:"Fin real anterior al aviso",d:"La fecha de fin avería es previa a la de aviso. Revisar la carga."},
+  {k:"ptbo",t:"Petición de borrado",d:"PTBO: se excluyen del análisis. Confirmar el borrado o reactivar."}];
+async function cargar(){
+  if(FUENTE.appsScriptUrl){
+    try{const r=await fetch(FUENTE.appsScriptUrl,{cache:"no-store"}); const j=await r.json(); if(j.AVISOS&&j.AVISOS.length>1) return {raw:j,src:"Google Sheets (Apps Script)"};}catch(e){console.warn("Apps Script",e);}
+  }
+  if(FUENTE.sheetId){
+    try{
+      const r=await fetch(`https://docs.google.com/spreadsheets/d/${FUENTE.sheetId}/gviz/tq?tqx=out:csv`,{cache:"no-store"}); if(!r.ok) throw new Error("http");
+      const t=await r.text(); if(/^\s*</.test(t)) throw new Error("sin acceso"); const A=parseCSV(t);
+      if(A.length>1&&A[0].map(nkey).includes("n aviso")) return {raw:{AVISOS:A},src:"Google Sheets"};
+    }catch(e){console.warn("Sheets",e);}
+  }
+  return {raw:EMBEBIDO,src:"Copia embebida · "+FECHA_EMB};
+}
+
+/* ---------- filtros ---------- */
+const pasa=(r,skip)=>(ST.anio==="ALL"||r.anio===ST.anio)&&(skip==="sec"||ST.sec==="ALL"||r.sec===ST.sec||(ST.sec==="Gasoducto (todos)"&&r.sec.startsWith("Gasoducto")))
+  &&(skip==="sis"||ST.sis==="ALL"||r.sis===ST.sis)&&(skip==="eq"||ST.eq==="ALL"||r.eq===ST.eq)&&(ST.cla==="ALL"||r.cla===ST.cla)&&(ST.res==="ALL"||r.resp===ST.res)&&!ST.off.has(r.pr);
+const vis=()=>D.rows.filter(r=>pasa(r));
+const ordenar=a=>a.sort((x,y)=>x.rk-y.rk||(y.venc-x.venc)||(y.dias??0)-(x.dias??0));
+const pbadge=k=>{const p=prioDe(k);return `<span class="tb" style="background:${p.c}" title="${esc(p.n)}">${k?k+" · ":""}${esc(p.s||p.n)}</span>`;};
+const ebadge=r=>{const k={Abierto:r.venc?"bad":"warn",Cerrado:"ok",Anulado:"na"}[r.e];return `<span class="stat ${k}">${r.e}${r.ab&&r.venc?" · prog. vencida":""}</span>`;};
+
+/* ---------- resumen ---------- */
+function tarjetas(R){
+  const V=R.filter(r=>!r.anu), A=V.filter(r=>r.ab), C=V.filter(r=>r.cer), An=R.filter(r=>r.anu);
+  const crit=A.filter(r=>r.crit), venc=A.filter(r=>r.venc);
+  const prom=A.length?A.reduce((a,r)=>a+(r.dias||0),0)/A.length:null, mx=A.length?Math.max(...A.map(r=>r.dias||0)):null;
+  const dC=C.map(r=>r.dias).filter(v=>v!==null), med=median(dC);
+  const conFd=C.filter(r=>r.enPlazo!==null), okFd=conFd.filter(r=>r.enPlazo).length;
+  const cnt=(arr,f)=>arr.filter(f).length;
+  const sub=items=>`<div class="csub">${items.map(([l,v,c])=>`<div><span>${c?`<span class="sw" style="background:${c}"></span>`:""}${esc(l)}</span><b>${typeof v==="string"?v:fmt(v)}</b></div>`).join("")}</div>`;
+  const cards=[
+    {t:"Avisos registrados",v:R.length,d:"En la bajada SAP filtrada",s:sub([["Abiertos",A.length,"var(--e-pen)"],["Cerrados",C.length,"var(--e-ok)"],["Anulados (PTBO)",An.length,"var(--e-nc)"]])},
+    {t:"Abiertos",v:A.length,d:V.length?`${fmt(A.length/V.length*100)} % del total vigente`:"",s:sub(FASES.filter(f=>cnt(A,r=>r.fase===f.n)).map(f=>[f.n,cnt(A,r=>r.fase===f.n),f.c]).concat([["Con orden asignada (ORAS)",cnt(A,r=>r.tk.includes("ORAS"))]]))},
+    {t:"Abiertos críticos",v:crit.length,d:"Emergencia, muy alta o fuera de servicio",st:A.length?`<span class="stat ${crit.length?"bad":"ok"}">${crit.length?ICON_BAD+"Requieren seguimiento":ICON_OK+"Sin críticos"}</span>`:"",
+      s:sub([["Emergencia (0)",cnt(A,r=>r.pr==="0"),"var(--p0)"],["Muy alta (1)",cnt(A,r=>r.pr==="1"),"var(--p1)"],["Fuera de servicio (rep. 3)",cnt(A,r=>r.rp==="3")],["Operación condicional (rep. 2)",cnt(A,r=>r.rp==="2")]])},
+    {t:"Antigüedad abiertos",v:prom,u:"días",d:"Promedio desde la fecha de aviso",s:sub([["Máximo",mx],["Más de 180 días",cnt(A,r=>r.dias>180)],["Programación vencida",venc.length],["Sin fin deseado",cnt(A,r=>!r.fd)]])},
+    {t:"Tiempo de resolución",v:med,u:"días",d:"Mediana aviso → fin avería real",s:sub([["Cerrados medidos",dC.length],["Promedio",dC.length?dC.reduce((a,b)=>a+b,0)/dC.length:null],["Cerrados dentro del fin deseado",conFd.length?fmt(okFd/conFd.length*100)+" %":"—"]])},
+  ];
+  const G=["var(--g1)","var(--g2)","var(--g3)","var(--g4)","var(--g5)"];
+  document.getElementById("cards").innerHTML=cards.map((c,k)=>`<div class="panel card" style="background:${G[k]}">
+    <h3>${c.t}</h3><span class="lbl">${c.d}</span><div class="bign">${fmt(c.v)}${c.u?`<small>${c.u}</small>`:""}</div>${c.st||""}${c.s}</div>`).join("");
+  const f=[ST.anio!=="ALL"?"Año "+ST.anio:null,ST.sec!=="ALL"?ST.sec:null,ST.sis!=="ALL"?ST.sis:null,ST.eq!=="ALL"?ST.eq:null,ST.cla!=="ALL"?ST.cla+" "+(CLASES[ST.cla]||""):null,ST.res!=="ALL"?"Resp. "+ST.res:null].filter(Boolean);
+  document.getElementById("resSub").textContent=(f.length?"Filtro: "+f.join(" · "):"Todo el GPM")+` · al ${fdate(HOY)}`;
+}
+
+/* ---------- abiertos por sector ---------- */
+const GRUPOS=[{n:"PC Tratayén",f:r=>r.sec==="PC Tratayén"},{n:"PC Salliqueló",f:r=>r.sec==="PC Salliqueló"},{n:"Gasoducto",f:r=>r.sec.startsWith("Gasoducto")}];
+const LIM=8, abiertos={};
+function sectores(R){
+  const A=R.filter(r=>r.ab);
+  const otros=A.filter(r=>!GRUPOS.some(g=>g.f(r)));
+  const G=GRUPOS.concat(otros.length?[{n:"Otros",f:r=>otros.includes(r)}]:[]);
+  document.getElementById("sectores").innerHTML=G.map(g=>{
+    const L=ordenar(A.filter(g.f)), all=abiertos[g.n], vis=all?L:L.slice(0,LIM);
+    const cr=L.filter(r=>r.crit).length, vc=L.filter(r=>r.venc).length;
+    return `<div class="panel"><div class="ph"><h3>${esc(g.n)}</h3><span class="cnt">${L.length} abiertos · ${cr} críticos · ${vc} prog. venc.</span></div>
+      ${L.length?vis.map(item).join(""):`<p class="empty">Sin avisos abiertos.</p>`}
+      ${L.length>LIM?`<div class="more">${all?"":`${L.length-LIM} más · `}<button type="button" data-g="${esc(g.n)}">${all?"Ver menos":"Ver todos"}</button></div>`:""}</div>`;
+  }).join("");
+  document.querySelectorAll("#sectores .more button").forEach(b=>b.onclick=()=>{abiertos[b.dataset.g]=!abiertos[b.dataset.g]; sectores(vis());});
+}
+function item(r){
+  const hints=[r.venc?`<span class="hint">${ICON_BAD.replace('aria-hidden','width="12" height="12" aria-hidden')}Programación vencida</span>`:"",
+    r.dq.includes("mece")?`<span class="hint p">Cerrado en SAP</span>`:""].join("");
+  const lugar=r.sec.startsWith("Gasoducto")?r.sec.replace("Gasoducto ","")+" · "+r.sis:r.sis;
+  return `<div class="it"><div class="r1">${pbadge(r.pr)}<span class="tb o" title="${esc(CLASES[r.cla]||"")}">${esc(r.cla)}</span><span class="inst">${esc(lugar)}</span><span class="id">${esc(r.av)}</span>${hints}</div>
+    <div class="cond" title="${esc(r.desc)}">${esc(r.desc)}${r.eq?` <span class="id">· ${esc(r.eq)}</span>`:""}</div>
+    <div class="r3"><span><b>${fmt(r.dias)}</b> días</span><span>aviso ${fdate(r.fa)}</span>${r.fd?`<span>fin deseado ${fdate(r.fd)}</span>`:""}<span class="code">${esc(r.st||"—")}</span>${r.rp?`<span>Rep. ${esc(REP_C[r.rp])}</span>`:""}</div></div>`;
+}
+
+/* ---------- matrices ---------- */
+function heat(p,maxP,base){const a=p?Math.min(.7,.15+.55*p/maxP):0; return p?`color-mix(in srgb,var(${base}) ${Math.round(a*100)}%,transparent)`:"transparent";}
+function matriz(R){
+  const V=R.filter(r=>!r.anu);
+  const secs=[...new Set(V.map(r=>r.sec))].sort(ordSec);
+  const P=PRIOS.filter(p=>!ST.off.has(p.k)&&V.some(r=>r.pr===p.k)).sort((a,b)=>a.r-b.r);
+  const maxP=Math.max(1,...P.flatMap(p=>secs.map(s=>V.filter(r=>r.ab&&r.pr===p.k&&r.sec===s).length)));
+  const cell=f=>{const all=V.filter(f), a=all.filter(r=>r.ab).length; return `<td class="c"><span style="background:${heat(a,maxP,"--e-pen")}">${a}<small> / ${all.length}</small></span></td>`;};
+  let h=`<table class="mx"><thead><tr><th>Prioridad</th>${secs.map(s=>`<th style="text-align:center">${esc(s.replace("Gasoducto tramo","Tramo"))}</th>`).join("")}<th style="text-align:center">Total</th></tr></thead><tbody>`;
+  P.forEach(p=>{h+=`<tr><td class="nw">${pbadge(p.k)}</td>${secs.map(s=>cell(r=>r.pr===p.k&&r.sec===s)).join("")}${cell(r=>r.pr===p.k)}</tr>`;});
+  h+=`<tr><td class="nw"><b>Total</b></td>${secs.map(s=>cell(r=>r.sec===s)).join("")}${cell(()=>true)}</tr></tbody></table>`;
+  document.getElementById("matriz").innerHTML=V.length?h:`<p class="empty">Sin datos.</p>`;
+  // prioridad × repercusión (abiertos)
+  const A=V.filter(r=>r.ab), RK=["1","2","3",""];
+  const maxR=Math.max(1,...P.flatMap(p=>RK.map(k=>A.filter(r=>r.pr===p.k&&r.rp===k).length)));
+  const c2=f=>{const n=A.filter(f).length; return `<td class="c"><span style="background:${heat(n,maxR,"--p1")}">${n||"·"}</span></td>`;};
+  let g=`<table class="mx"><thead><tr><th>Prioridad · abiertos</th>${RK.map(k=>`<th style="text-align:center">${REP_C[k]}</th>`).join("")}<th style="text-align:center">Total</th></tr></thead><tbody>`;
+  P.forEach(p=>{g+=`<tr><td class="nw">${pbadge(p.k)}</td>${RK.map(k=>c2(r=>r.pr===p.k&&r.rp===k)).join("")}${c2(r=>r.pr===p.k)}</tr>`;});
+  g+=`<tr><td class="nw"><b>Total</b></td>${RK.map(k=>c2(r=>r.rp===k)).join("")}${c2(()=>true)}</tr></tbody></table>`;
+  document.getElementById("matrizRep").innerHTML=A.length?g:`<p class="empty">Sin avisos abiertos.</p>`;
+  const conR=V.filter(r=>r.rp).length;
+  document.getElementById("repSub").textContent=`La repercusión está cargada en ${conR} de ${V.length} avisos (${V.length?fmt(conR/V.length*100):0} %). Los vacíos se muestran como "Sin dato".`;
+}
+
+/* ---------- gráficos ---------- */
+function niceMax(mx){ if(mx<=0) return {top:1,st:1}; const raw=mx/4, p=Math.pow(10,Math.floor(Math.log10(raw))); const st=Math.max(1,[1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)); return {top:Math.ceil(mx/st)*st,st}; }
+function tipHandlers(host,W,rects,html){
+  const tip=host.querySelector(".tip");
+  host.querySelectorAll(rects).forEach(r=>{
+    const show=()=>{const i=+r.dataset.i; tip.innerHTML=html(i); const bb=r.getBBox();
+      tip.style.left=Math.min(Math.max(bb.x+bb.width/2,110),W-110)+"px"; tip.style.top=(bb.y+4)+"px"; tip.hidden=false;};
+    r.addEventListener("mouseenter",show); r.addEventListener("touchstart",show,{passive:true});
+    r.addEventListener("mouseleave",()=>tip.hidden=true);
+  });
+}
+function combo(host,{cats,bars,line}){
+  const W=Math.max(280,host.clientWidth), H=Math.round(Math.min(240,Math.max(190,W*.45))), m={l:34,r:12,t:12,b:26};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b; const mx=Math.max(1,...bars.flatMap(b=>b.values),...line.values); const {top,st}=niceMax(mx);
+  const y=v=>m.t+ih*(1-v/top), bw=iw/cats.length, gw=Math.max(2,Math.min(28,bw*.8)/bars.length);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Altas, cierres y abiertos por mes">`;
+  for(let t=0;t<=top+.001;t+=st) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)"/><text x="${m.l-6}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`;
+  const every=Math.ceil(cats.length/(W<480?6:12));
+  cats.forEach((c,i)=>{ const cx=m.l+bw*(i+.5);
+    bars.forEach((b,k)=>{const v=b.values[i]; if(v) s+=`<rect x="${cx-gw*bars.length/2+gw*k+.5}" y="${y(v)}" width="${Math.max(1,gw-1)}" height="${y(0)-y(v)}" rx="1.5" fill="${b.color}"/>`;});
+    if(i%every===0) s+=`<text x="${cx}" y="${H-6}" text-anchor="middle">${c}</text>`; });
+  s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink-3)" stroke-opacity=".5"/>`;
+  s+=`<path d="${line.values.map((v,i)=>(i?"L":"M")+(m.l+bw*(i+.5))+","+y(v)).join("")}" fill="none" stroke="${line.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  if(cats.length<=24) line.values.forEach((v,i)=>s+=`<circle cx="${m.l+bw*(i+.5)}" cy="${y(v)}" r="3" fill="${line.color}" stroke="var(--panel)" stroke-width="1.5"/>`);
+  cats.forEach((c,i)=>s+=`<rect class="hz" data-i="${i}" x="${m.l+bw*i}" y="${m.t}" width="${bw}" height="${ih}" fill="transparent"/>`);
+  host.innerHTML=s+`</svg><div class="tip" hidden></div>`;
+  tipHandlers(host,W,"rect.hz",i=>`<div style="opacity:.8;margin-bottom:3px">${cats[i]}</div>`+[...bars,line].map(z=>`<div><span class="sw" style="background:${z.color}"></span>${z.name} <b>${fmt(z.values[i])}</b></div>`).join(""));
+}
+function apiladas(host,{cats,series,unit}){
+  const W=Math.max(280,host.clientWidth), H=Math.round(Math.min(240,Math.max(190,W*.45))), m={l:34,r:12,t:16,b:26};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b; const tot=cats.map((_,i)=>series.reduce((a,z)=>a+z.values[i],0)); const {top,st}=niceMax(Math.max(1,...tot));
+  const y=v=>m.t+ih*(1-v/top), bw=iw/cats.length, w=Math.min(56,bw*.6);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Abiertos por antigüedad">`;
+  for(let t=0;t<=top+.001;t+=st) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)"/><text x="${m.l-6}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`;
+  cats.forEach((c,i)=>{const cx=m.l+bw*(i+.5); let acc=0;
+    series.forEach(z=>{const v=z.values[i]; if(v){ s+=`<rect x="${cx-w/2}" y="${y(acc+v)}" width="${w}" height="${y(acc)-y(acc+v)}" fill="${z.color}" stroke="var(--panel)" stroke-width="1"/>`; acc+=v; }});
+    if(tot[i]) s+=`<text x="${cx}" y="${y(tot[i])-5}" text-anchor="middle" style="fill:var(--ink)">${tot[i]}</text>`;
+    s+=`<text x="${cx}" y="${H-6}" text-anchor="middle">${c}</text>`;
+    s+=`<rect class="hz" data-i="${i}" x="${m.l+bw*i}" y="${m.t}" width="${bw}" height="${ih}" fill="transparent"/>`;});
+  s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink-3)" stroke-opacity=".5"/>`;
+  host.innerHTML=s+`</svg><div class="tip" hidden></div>`;
+  tipHandlers(host,W,"rect.hz",i=>(`<div style="opacity:.8;margin-bottom:3px">${cats[i]} ${unit||""}</div>`+series.filter(z=>z.values[i]).map(z=>`<div><span class="sw" style="background:${z.color}"></span>${z.name} <b>${z.values[i]}</b></div>`).join(""))||"Sin datos");
+}
+function barrasH(host,{items,series,suf}){
+  if(!items.length){host.innerHTML=`<p class="empty">Sin datos.</p>`;return;}
+  const W=Math.max(280,host.clientWidth), rh=22, lw=Math.min(230,W*.45), m={l:lw,r:40,t:4,b:4}, H=m.t+m.b+rh*items.length;
+  const iw=W-m.l-m.r; const mx=Math.max(1,...items.map(it=>it.parts.reduce((a,b)=>a+b,0))); const x=v=>iw*v/mx;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Distribución">`;
+  items.forEach((it,i)=>{const yy=m.t+rh*i; let acc=0; const t=it.parts.reduce((a,b)=>a+b,0);
+    const mxc=Math.floor(lw/6.5), lab=it.label.length>mxc?it.label.slice(0,mxc-1)+"…":it.label;
+    s+=`<text class="lb" x="${m.l-8}" y="${yy+rh/2+4}" text-anchor="end">${esc(lab)}</text>`;
+    it.parts.forEach((v,k)=>{ if(v){ s+=`<rect x="${m.l+x(acc)}" y="${yy+4}" width="${x(v)}" height="${rh-8}" fill="${(it.colors||[])[k]||series[k].color}" stroke="var(--panel)" stroke-width="1"/>`; acc+=v; }});
+    s+=`<text x="${m.l+x(t)+5}" y="${yy+rh/2+4}">${fmt(t)}${suf||""}</text>`;
+    s+=`<rect class="hz" data-i="${i}" x="0" y="${yy}" width="${W}" height="${rh}" fill="transparent"/>`;});
+  host.innerHTML=s+`</svg><div class="tip" hidden></div>`;
+  tipHandlers(host,W,"rect.hz",i=>`<div style="opacity:.8;margin-bottom:3px">${esc(items[i].label)}</div>`+(items[i].tip||series.map((z,k)=>items[i].parts[k]?`<div><span class="sw" style="background:${z.color}"></span>${z.name} <b>${fmt(items[i].parts[k])}</b></div>`:"").join("")));
+}
+function graficos(R){
+  const V=R.filter(r=>!r.anu), A=V.filter(r=>r.ab);
+  const fs=V.map(r=>r.fa).filter(Boolean);
+  if(!fs.length){["chMes","chAnt","chSis","chCla","chEq","chTr","chFase"].forEach(id=>document.getElementById(id).innerHTML=`<p class="empty">Sin datos.</p>`);return;}
+  const ini=new Date(Math.min(...fs)); let a=ini.getFullYear(), mo=ini.getMonth(); const meses=[];
+  while(a<HOY.getFullYear()||(a===HOY.getFullYear()&&mo<=HOY.getMonth())){meses.push([a,mo]); mo++; if(mo>11){mo=0;a++;}}
+  const key=d=>d?d.getFullYear()*12+d.getMonth():null, k0=meses[0][0]*12+meses[0][1];
+  const altas=meses.map(([y,m])=>V.filter(r=>key(r.fa)===y*12+m).length);
+  const cierres=meses.map(([y,m])=>V.filter(r=>r.cer&&(Math.max(key(r.fr),k0))===y*12+m).length);
+  let acc=0; const back=meses.map((_,i)=>acc+=altas[i]-cierres[i]);
+  combo(document.getElementById("chMes"),{cats:meses.map(([y,m])=>MES_C[m]+" "+String(y).slice(2)),bars:[{name:"Altas",color:"var(--p4)",values:altas},{name:"Cierres",color:"var(--e-ok)",values:cierres}],line:{name:"Abiertos",color:"var(--ink)",values:back}});
+  // antigüedad
+  const rng=[["0–30",0,30],["31–90",31,90],["91–180",91,180],["181–365",181,365],[">365",366,1e9]];
+  const P=PRIOS.filter(p=>!ST.off.has(p.k)&&A.some(r=>r.pr===p.k)).sort((x,y)=>x.r-y.r);
+  apiladas(document.getElementById("chAnt"),{unit:"días",cats:rng.map(x=>x[0]),series:P.map(p=>({name:p.s||p.n,color:p.c,values:rng.map(([_,lo,hi])=>A.filter(r=>r.pr===p.k&&r.dias>=lo&&r.dias<=hi).length)}))});
+  document.getElementById("legPrio").innerHTML=P.map(p=>`<span><i style="background:${p.c}"></i>${esc(p.s||p.n)}</span>`).join("");
+  // fase SAP de abiertos
+  const F=FASES.filter(f=>A.some(r=>r.fase===f.n));
+  barrasH(document.getElementById("chFase"),{items:F.map(f=>({label:f.n,parts:P.map(p=>A.filter(r=>r.fase===f.n&&r.pr===p.k).length)})),series:P.map(p=>({name:p.s||p.n,color:p.c}))});
+  document.getElementById("legFase").innerHTML=P.map(p=>`<span><i style="background:${p.c}"></i>${esc(p.s||p.n)}</span>`).join("");
+  // por sistema, clase, equipo
+  const est=ESTS.slice(0,2).map(e=>({name:e.n,color:e.c})); const leg=est.map(e=>`<span><i style="background:${e.color}"></i>${e.name}</span>`).join("");
+  ["legE1","legE2","legE3"].forEach(id=>document.getElementById(id).innerHTML=leg);
+  const agr=(fk,lab,top)=>{const ks=[...new Set(V.map(fk).filter(Boolean))];
+    const g=ks.map(k=>({label:lab?lab(k):k,parts:est.map(e=>V.filter(r=>fk(r)===k&&r.e===e.name).length)}));
+    g.sort((a,b)=>b.parts[0]-a.parts[0]||(b.parts[0]+b.parts[1])-(a.parts[0]+a.parts[1])); return top?g.sort((a,b)=>(b.parts[0]+b.parts[1])-(a.parts[0]+a.parts[1])||b.parts[0]-a.parts[0]).slice(0,top):g;};
+  const secSis=ST.sec==="ALL";
+  barrasH(document.getElementById("chSis"),{items:agr(r=>secSis?(r.sec.startsWith("Gasoducto")?"Gasoducto":r.sec.replace("PC ",""))+" · "+r.sis:r.sis),series:est});
+  barrasH(document.getElementById("chCla"),{items:agr(r=>r.cla,k=>`${k} · ${CLASES[k]||"Sin catálogo"}`),series:est});
+  barrasH(document.getElementById("chEq"),{items:agr(r=>r.eq?r.eq+" ("+(r.sec.startsWith("Gasoducto")?r.sec.replace("Gasoducto tramo ","Tr. "):r.sec.replace("PC ",""))+")":"",null,12),series:est});
+  // tiempo de resolución
+  const C=V.filter(r=>r.cer&&r.dias!==null), PC=PRIOS.filter(p=>!ST.off.has(p.k)&&C.some(r=>r.pr===p.k)).sort((x,y)=>x.r-y.r);
+  barrasH(document.getElementById("chTr"),{suf:" d",series:[{name:"Mediana",color:"var(--p4)"}],items:PC.map(p=>{const d=C.filter(r=>r.pr===p.k).map(r=>r.dias), me=median(d);
+    return {label:p.n,parts:[Math.round(me)],colors:[p.c],tip:`<div>Mediana <b>${fmt(me)}</b> días</div><div>Promedio <b>${fmt(d.reduce((a,b)=>a+b,0)/d.length)}</b> días</div><div>Avisos cerrados <b>${d.length}</b></div>`};})});
+  document.getElementById("notaTr").textContent="Días desde la fecha de aviso hasta el fin avería real. La mediana evita que unos pocos avisos muy largos distorsionen el valor.";
+  document.getElementById("grSub").textContent="Altas por fecha de aviso, cierres por fin avería real. Sin anulados. Barras ordenadas por cantidad de abiertos.";
+}
+
+/* ---------- calidad de datos ---------- */
+function calidad(R){
+  document.getElementById("dq").innerHTML=DQ.map(q=>{const n=R.filter(r=>r.dq.includes(q.k)).length;
+    return `<div class="panel dq"><span class="lbl">${esc(q.t)}</span><span class="n" style="color:${n?"var(--bad)":"var(--ok)"}">${n}</span><p>${esc(q.d)}</p>${n?`<button type="button" class="btn" data-k="${q.k}">Ver en planilla</button>`:""}</div>`;}).join("");
+  document.querySelectorAll("#dq button").forEach(b=>b.onclick=()=>{ST.tab="d";ST.dqf=b.dataset.k;
+    document.querySelectorAll("#segTab button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v==="d")); planilla(vis()); document.getElementById("hTab").scrollIntoView({behavior:"smooth"});});
+}
+
+/* ---------- planilla ---------- */
+let ULT=[];
+function planilla(R){
+  const q=ST.q.toLowerCase();
+  let L=ST.tab==="a"?R.filter(r=>r.ab):ST.tab==="d"?R.filter(r=>ST.dqf?r.dq.includes(ST.dqf):r.dq.length):R.slice();
+  if(q) L=L.filter(r=>[r.av,r.desc,r.u,r.ord,r.eq,r.sis,r.sec,r.cla,r.st,r.resp].join(" ").toLowerCase().includes(q));
+  L=ST.tab==="a"?ordenar(L):L.sort((a,b)=>(b.fa||0)-(a.fa||0));
+  ULT=L;
+  const dqN=ST.tab==="d"&&ST.dqf?" · "+DQ.find(x=>x.k===ST.dqf).t:"";
+  document.getElementById("tabSub").textContent=`${L.length} avisos · ${ST.tab==="a"?"abiertos por prioridad y antigüedad":ST.tab==="d"?"a depurar"+dqN:"todos, del más reciente al más antiguo"}`;
+  const dqTxt=r=>r.dq.map(k=>DQ.find(x=>x.k===k).t).join(" · ");
+  document.getElementById("tab").innerHTML=L.length?`<table><thead><tr><th>N° aviso</th><th>Fecha</th><th>Clase</th><th>Prioridad</th><th>Rep.</th><th>Sector</th><th>Sistema</th><th>Descripción</th><th>Orden</th><th>Estatus SAP</th><th>Fin deseado</th><th>Fin real</th><th style="text-align:right">Días</th><th>Estado</th></tr></thead><tbody>${
+    L.map(r=>`<tr><td class="n">${esc(r.av)}</td><td class="nw">${fdate(r.fa)}</td><td class="nw" title="${esc(CLASES[r.cla]||"")}">${esc(r.cla)}</td><td>${pbadge(r.pr)}</td><td class="nw">${r.rp?esc(REP_C[r.rp]):"—"}</td>
+      <td class="nw">${esc(r.sec)}</td><td>${esc(r.sis)}</td>
+      <td class="w">${esc(r.desc)}<div class="sub">${esc(r.u)}${r.eq?" · "+esc(r.eq):""}${r.resp!=="Sin responsable"?" · resp. "+esc(r.resp):""}</div>${r.dq.length?`<div class="sub" style="color:var(--bad)">${esc(dqTxt(r))}</div>`:""}</td>
+      <td class="nw">${esc(r.ord)||"—"}</td><td><span class="code">${esc(r.st||"—")}</span></td><td class="nw">${fdate(r.fd)}</td><td class="nw">${fdate(r.fr)}</td><td class="n">${fmt(r.dias)}</td><td>${ebadge(r)}</td></tr>`).join("")}</tbody></table>`
+    :`<p class="empty">No hay avisos para los filtros seleccionados.</p>`;
+}
+function exportarCSV(){
+  const f=d=>d?d.toISOString().slice(0,10):"";
+  const H=["N° Aviso","Fecha aviso","Clase","Prioridad","Repercusión","Sector","Sistema","Equipo/objeto","Descripción","Ubicación técnica","Orden","Estatus","Fin deseado","Fin avería real","Días","Estado","A depurar"];
+  const rows=ULT.map(r=>[r.av,f(r.fa),r.cla,r.pr,r.rp,r.sec,r.sis,r.eq,r.desc,r.u,r.ord,r.st,f(r.fd),f(r.fr),r.dias??"",r.e,r.dq.map(k=>DQ.find(x=>x.k===k).t).join(" | ")]);
+  const csv=[H,...rows].map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"})); a.download=`avisos_gpm_${f(HOY)}.csv`; a.click();
+}
+
+const ordSec=(a,b)=>{const o=s=>s==="PC Tratayén"?0:s==="PC Salliqueló"?1:s.startsWith("Gasoducto tramo")?2:s.startsWith("Gasoducto")?3:4; return o(a)-o(b)||a.localeCompare(b,"es");};
+function render(){ const R=vis(); tarjetas(R); sectores(R); matriz(R); graficos(R); calidad(R); planilla(R); }
+function opciones(){
+  // Sistema y equipo dependen del sector (y sistema) elegido
+  const fill=(id,lbl,vals,k)=>{const s=document.getElementById(id); if(ST[k]!=="ALL"&&!vals.includes(ST[k])) ST[k]="ALL";
+    s.innerHTML=`<option value="ALL">${lbl}</option>`+vals.map(v=>`<option${v===ST[k]?" selected":""}>${esc(v)}</option>`).join("");};
+  fill("selSis","Todos",[...new Set(D.rows.filter(r=>pasa(r,"sis")).map(r=>r.sis))].sort((a,b)=>a.localeCompare(b,"es")),"sis");
+  fill("selEq","Todos",[...new Set(D.rows.filter(r=>pasa(r,"eq")).map(r=>r.eq).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true})),"eq");
+}
+function controles(){
+  const opt=(id,lbl,vals,k,txt)=>{const s=document.getElementById(id); s.innerHTML=`<option value="ALL">${lbl}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(txt?txt(v):v)}</option>`).join(""); s.onchange=()=>{ST[k]=s.value; opciones(); render();};};
+  opt("selAnio","Todos",[...new Set(D.rows.map(r=>r.anio).filter(Boolean))].sort().reverse(),"anio");
+  const secs=[...new Set(D.rows.map(r=>r.sec))].sort(ordSec); const iG=secs.findIndex(s=>s.startsWith("Gasoducto"));
+  if(iG>=0) secs.splice(iG,0,"Gasoducto (todos)");
+  opt("selSec","Todos",secs,"sec");
+  ["selSis","selEq"].forEach((id,i)=>document.getElementById(id).onchange=e=>{ST[i?"eq":"sis"]=e.target.value; opciones(); render();});
+  opt("selCla","Todas",[...new Set(D.rows.map(r=>r.cla))].sort(),"cla",v=>`${v} · ${CLASES[v]||"Sin catálogo"}`);
+  opt("selRes","Todos",[...new Set(D.rows.map(r=>r.resp))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true})),"res");
+  opciones();
+  const ch=document.getElementById("chips"), PP=PRIOS.filter(p=>D.rows.some(r=>r.pr===p.k)).sort((a,b)=>a.r-b.r);
+  ch.insertAdjacentHTML("beforeend",PP.map(p=>`<button type="button" class="chip" aria-pressed="true" data-k="${p.k}" title="${esc(p.n)}"><i style="background:${p.c}"></i>${esc(p.s||p.n)}</button>`).join(""));
+  ch.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
+    if(ST.off.has(k)) ST.off.delete(k); else { if(PP.length-ST.off.size<=1) return; ST.off.add(k); }
+    b.setAttribute("aria-pressed",!ST.off.has(k)); opciones(); render();});
+  document.querySelectorAll("#segTab button").forEach(b=>b.onclick=()=>{ST.tab=b.dataset.v; ST.dqf=null; b.parentNode.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); planilla(vis());});
+  const q=document.getElementById("q"); q.oninput=()=>{ST.q=q.value.trim(); planilla(vis());};
+  document.getElementById("btnCsv").onclick=exportarCSV;
+  const dl=(id,o)=>document.getElementById(id).innerHTML=Object.entries(o).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  dl("defCla",CLASES); dl("defSt",STATUS); dl("defRep",{...REPER,"vacío":"Sin dato (se ignora)"});
+  dl("defPrio",Object.fromEntries(PRIOS.filter(p=>p.k).map(p=>[p.k,p.n])));
+  const fm=D.rows.map(r=>r.fa).filter(Boolean); if(fm.length) document.getElementById("corte").textContent="Avisos del "+fdate(new Date(Math.min(...fm)))+" al "+fdate(new Date(Math.max(...fm)));
+}
+(async()=>{
+  const {raw,src}=await cargar(); D=normalizar(raw);
+  document.getElementById("fuenteDatos").textContent="Fuente: "+src+(raw.generado?" · actualizado "+new Date(raw.generado).toLocaleString("es-AR"):"");
+  if(!D.rows.length){document.querySelector("main").innerHTML=`<p class="empty">No se encontraron datos.</p>`;return;}
+  controles(); render();
+  let w=innerWidth; addEventListener("resize",()=>{ if(Math.abs(innerWidth-w)>40){w=innerWidth; graficos(vis());} });
+})();
+</script>
+</body></html>
